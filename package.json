@@ -4,7 +4,7 @@
   "description": "An Elegant markdown document writer",
   "main": "src/index.js",
   "scripts": {
-    "test": "node src/index.js",
+    "test": "nodemon --watch public/ --watch src/ --watch config/ src/index.js",
     "g-create": "gcloud app create",
     "g-deploy": "gcloud app deploy"
   },
@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "cors": "^2.8.5",
+    "ejs": "^3.1.5",
     "express": "^4.17.1",
     "fs": "^0.0.1-security"
   }

@@ -16,12 +16,15 @@ const Express = require('express');
 const app = Express();
 
 // Importing Cors Policy
-console.log("\n\tImporting: Cors");
+console.log("\tImporting: Cors");
 const Cors = require('cors');
 
 // Impporting File System API
-console.log("\n\tImporting: fs");
+console.log("\tImporting: fs");
 const FS = require('fs');
+
+console.log("\t Importing: Path");
+const Path = require('path');
 
 console.log("Import Complete. Setting Up Enviroment.");
 
@@ -32,8 +35,18 @@ const port = config.server.port;
 console.log("Server will be running on port: " + port);
 
 // Setting Server Up
-app.use(cors());                                                                // Sets Cors Policy
+app.use(Express.static(__dirname + '/public'));
+app.use(Cors());                                                                // Sets Cors Policy
+
 app.set('view engine', 'ejs');                                                  // Sets EJS as view engine
-app.use(Express.static('public'));                                              // Sets Public access to the folder "public"
+
+app.get('/', function(req, res)
+{
+    res.render('index');
+});
 
 
+app.listen(port, function()
+{
+    console.log("Server Ready");
+});
