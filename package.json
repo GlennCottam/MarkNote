@@ -4,7 +4,7 @@
   "description": "An Elegant markdown document writer",
   "main": "src/index.js",
   "scripts": {
-    "test": "nodemon --watch public/ --watch src/ --watch config/ src/index.js",
+    "test": "nodemon --watch src/ --watch config/ src/index.js",
     "g-create": "gcloud app create",
     "g-deploy": "gcloud app deploy"
   },

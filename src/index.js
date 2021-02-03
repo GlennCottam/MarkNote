@@ -23,9 +23,6 @@ const Cors = require('cors');
 console.log("\tImporting: fs");
 const FS = require('fs');
 
-console.log("\t Importing: Path");
-const Path = require('path');
-
 console.log("Import Complete. Setting Up Enviroment.");
 
 // Setting Global Values
@@ -35,9 +32,8 @@ const port = config.server.port;
 console.log("Server will be running on port: " + port);
 
 // Setting Server Up
-app.use(Express.static(__dirname + '/public'));
+app.use(Express.static('public'));                                              // Sets public directory
 app.use(Cors());                                                                // Sets Cors Policy
-
 app.set('view engine', 'ejs');                                                  // Sets EJS as view engine
 
 app.get('/', function(req, res)
