@@ -23,6 +23,12 @@ const Cors = require('cors');
 console.log("\tImporting: fs");
 const FS = require('fs');
 
+// Importing Google API
+console.log("\tImporting: Google API");
+const {google} = require('googleapis');
+const client_secret = JSON.parse(FS.readFileSync('secure/client_secret.json'));
+console.log("Client Secret:\n" + JSON.stringify(client_secret));
+
 console.log("Import Complete. Setting Up Enviroment.");
 
 // Setting Global Values
@@ -46,3 +52,12 @@ app.listen(port, function()
 {
     console.log("Server Ready");
 });
+
+
+// Google Cloud Platform Test Function of OAuth2
+const oauth2Client = new google.auth.OAuth2(
+    client_secret.web.client_id,
+    client_secret.web.client_secret,
+    client_secret.web.auth_url
+);
+
