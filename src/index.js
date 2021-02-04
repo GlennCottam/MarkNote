@@ -27,7 +27,6 @@ const FS = require('fs');
 console.log("\tImporting: Google API");
 const {google} = require('googleapis');
 const client_secret = JSON.parse(FS.readFileSync('secure/client_secret.json'));
-console.log("Client Secret:\n" + JSON.stringify(client_secret));
 
 console.log("Import Complete. Setting Up Enviroment.");
 
@@ -42,9 +41,36 @@ app.use(Express.static('public'));                                              
 app.use(Cors());                                                                // Sets Cors Policy
 app.set('view engine', 'ejs');                                                  // Sets EJS as view engine
 
+
+// Google Cloud Platform Test Function of OAuth2
+const oauth2Client = new google.auth.OAuth2(
+    client_secret.web.client_id,
+    client_secret.web.client_secret,
+    client_secret.web.auth_url
+);
+
+const scopes = [
+    'https://www.googleapis.com/auth/drive.metadata.readonly'
+];
+
+var url = oauth2Client.generateAuthUrl
+({
+    access_type: 'online',      // 'online' (default) or 'offline (gets refresh_token)
+    scope: scopes               // If you only need one scope you can pass it as a string
+}) + "https://marknote.ue.r.appspot.com/code";
+
+var post_data;
+
+app.post('/code', function(req, res)
+{
+    console.log(req);
+    res.end();
+});
+
+// Running the server
 app.get('/', function(req, res)
 {
-    res.render('index');
+    res.render('index', {login_url: url});
 });
 
 
@@ -54,10 +80,5 @@ app.listen(port, function()
 });
 
 
-// Google Cloud Platform Test Function of OAuth2
-const oauth2Client = new google.auth.OAuth2(
-    client_secret.web.client_id,
-    client_secret.web.client_secret,
-    client_secret.web.auth_url
-);
+
 

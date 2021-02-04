@@ -6,6 +6,7 @@
 	],
 	"settings": {
 		"files.autoSave": "off",
+		"git.enabled": false,
 	},
 	"launch": {
 		"version": "0.2.0",
