@@ -70,8 +70,13 @@ app.post('/code', function(req, res)
 // Running the server
 app.get('/', function(req, res)
 {
-    res.render('index', {login_url: url});
+    res.render('editor', {login_url: url});
 });
+
+// app.get('/editor', function(req, res)
+// {
+//     res.render('editor');
+// });
 
 app.listen(port, function()
 {

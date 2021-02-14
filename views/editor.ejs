@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <!-- Viewport -->
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <!-- Bootstrap -->
+        <script src="bootstrap-5.0.0-beta1-dist/js/bootstrap.min.js"></script>
+        <link rel="stylesheet" href="bootstrap-5.0.0-beta1-dist/css/bootstrap.min.css">
+        <!-- FontAwesome -->
+        <script src="https://kit.fontawesome.com/c0fad50d4f.js" crossorigin="anonymous"></script>
+        <!-- Highlight JS -->
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/default.min.css">
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+        <!-- Showndown JS -->
+        <script src="/showdownjs-showdown-3c120ed/src/showdown.js"></script>
+        <!-- Title -->
+        <title>MarkNote | Editor</title>
+    </head>
+    <body>
+        <!-- Highlight / Showdown JS Script -->
+        <script>
+            var converter = new showdown.Converter();
+            
+            document.addEventListener('DOMContentLoaded', (event) => {
+                document.querySelectorAll('pre code').forEach((block) => {
+                    hljs.highlightBlock(block);
+                });
+                
+            });
+            $(document).on('keypress', function(e)
+            {
+                var html = converter.makeHTML($('#editor').val);
+                $('#viewer').text = html;
+            });
+        </script>
+
+
+        <%- include('header') %>
+        <div class="container-fluid mt-4">
+            <div class="row">
+                <div class="col-sm">
+                    <div class="form-floating">
+                        <textarea class="form-control" placeholder="Start Writing!" id="editor"></textarea>
+                        <label for="editor">Editor</label>
+                    </div>
+                    
+                </div>
+                <div class="col-sm border" id="viewer">
+                </div>
+            </div>
+        </div>
+        <%- include('footer') %>
+    </body>
+</html>
