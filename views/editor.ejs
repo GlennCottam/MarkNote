@@ -15,50 +15,19 @@
         <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
         <!-- Showndown JS -->
         <script src="/showdownjs-showdown-3c120ed/src/showdown.js"></script>
+        <!-- Highlight / Showdown JS Script -->
+        <script src="editor.js"></script>
         <!-- Title -->
         <title>MarkNote | Editor</title>
     </head>
     <body>
-        <!-- Highlight / Showdown JS Script -->
-        <script>
-
-            // On ENTER
-            $(document).keypress(function(e)
-            {
-                var key = e.which;
-                if(key == 13) // Enter Key
-                {
-                    test();
-                }
-            });
-
-            function test()
-            {
-                var settings = {
-                    "url": "https://8080-cs-329088372048-default.us-east1.cloudshell.dev/mdconvert/",
-                    "method": "GET",
-                    "timeout": 0,
-                    "data": {
-                        "text": $('#editor').val()
-                    }
-                }
-                $.ajax(settings).done(function (response) {
-                    console.log(response);
-                    $('#viewer').html(response);
-                });
-
-                hljs.initHighlightingOnLoad();
-            };
-
-        </script>
-
         <%- include('header') %>
-        <div class="container-fluid mt-4">
+        <div class="container mt-4">
             <div>
-                <div class="col-sm border" id="viewer"></div>
+                <div class="col-sm" id="viewer"></div>
                 <div class="form-floating">
                     <textarea class="form-control" placeholder="Start Writing!" id="editor"></textarea>
-                    <label for="editor">Editor</label>
+                    <label for="editor">Add Line</label>
                 </div>
             </div>
         </div>

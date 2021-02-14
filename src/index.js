@@ -26,10 +26,19 @@ const FS = require('fs');
 // Importing ShowdownJS for Markdown > HTML conversion serverside
 console.log("\tImporting: Showdown");
 const showdown = require('showdown');
+showdown.setOption('ghCodeBlocks', 'true');
+showdown.setOption('tasklists', 'true');
+showdown.setOption('parseImgDimensions', 'true');
+showdown.setOption('allOn');
 var mdconverter = new showdown.Converter();
 
 // Importing Highlight.JS for Code to Text conversion
 const h1js = require('highlight.js');
+h1js.configure(
+    {
+        "useBR": true
+    }
+)
 
 // Importing Google API
 console.log("\tImporting: Google API");
@@ -84,7 +93,8 @@ app.get('/', function(req, res)
 app.get('/mdconvert', function(req, res)
 {
     var text = req.param('text');
-    var html = mdconverter.makeHtml(text);
+    var highlight = h1js.highlightAuto(text).value;
+    var html = mdconverter.makeHtml(highlight);
     res.send(html);
 });
 
