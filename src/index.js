@@ -19,9 +19,17 @@ const app = Express();
 console.log("\tImporting: Cors");
 const Cors = require('cors');
 
-// Impporting File System API
+// Importing File System API
 console.log("\tImporting: fs");
 const FS = require('fs');
+
+// Importing ShowdownJS for Markdown > HTML conversion serverside
+console.log("\tImporting: Showdown");
+const showdown = require('showdown');
+var mdconverter = new showdown.Converter();
+
+// Importing Highlight.JS for Code to Text conversion
+const h1js = require('highlight.js');
 
 // Importing Google API
 console.log("\tImporting: Google API");
@@ -71,6 +79,13 @@ app.post('/code', function(req, res)
 app.get('/', function(req, res)
 {
     res.render('editor', {login_url: url});
+});
+
+app.get('/mdconvert', function(req, res)
+{
+    var text = req.param('text');
+    var html = mdconverter.makeHtml(text);
+    res.send(html);
 });
 
 // app.get('/editor', function(req, res)
