@@ -57,7 +57,7 @@ var url = oauth2Client.generateAuthUrl
 ({
     access_type: 'online',      // 'online' (default) or 'offline (gets refresh_token)
     scope: scopes               // If you only need one scope you can pass it as a string
-}) + "https://marknote.ue.r.appspot.com/code";
+}) + config.server.offical_url_code;
 
 var post_data;
 
@@ -73,12 +73,7 @@ app.get('/', function(req, res)
     res.render('index', {login_url: url});
 });
 
-
 app.listen(port, function()
 {
     console.log("Server Ready");
 });
-
-
-
-

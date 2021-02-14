@@ -1,0 +1,22 @@
+{
+    "name": "MarkNote",
+    "short_name": "MarkNote",
+    "start_url": "/?source=pwa",
+    "display": "standalone",
+    "background_color": "#212529",
+    "description": "Marknote Document Writer",
+    "icons":[
+        {
+            "src": "icons/96w/Artboard 1.png",
+            "type": "image/png",
+            "sizes": "any"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "landing",
+            "url": "/",
+            "description": "Landing Page"
+        }
+    ]
+}

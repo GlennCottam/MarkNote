@@ -1,15 +1,51 @@
+<!-- 
+    Marknote Landing Page
+    Information about Marknote, and login
+ -->
+
 <!DOCTYPE html>
 <html lang="en">
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <script src="bootstrap-5.0.0-beta1-dist/js/bootstrap.min.js"></script>
         <link rel="stylesheet" href="bootstrap-5.0.0-beta1-dist/css/bootstrap.min.css">
+        <script src="https://kit.fontawesome.com/c0fad50d4f.js" crossorigin="anonymous"></script>
+        <!-- App Manifest -->
+        <link rel="manifest" href="manifest.json" crossorigin="use-credentials">
         <title>MarkNote</title>
     </head>
-    <body class="bg-dark">
-        <header class="container bg-light rounded-bottom">
-            <h1>MarkNote</h1>
-            <button class="btn bg-primary text-white" onclick="window.location.href='<%=login_url%>'">Login Test</button>
+    <body>
+        <header>
+            <nav class="navbar navbar-dark bg-dark">
+                <div class="container-fluid">
+                    <h1 class="navbar-brand">MarkNote</h1>
+                    <div>
+                        <button class="btn btn-primary" onclick="window.open('https://github.com/GlennCottam/MarkNote', 'blank')"></i>&nbsp;View On Github</button>
+                        <button class="btn bg-primary text-white" onclick="window.open('<%=login_url%>', '_blank')">Login</button>
+                    </div>
+                </div>
+            </nav>
         </header>
+        <div class="container-fluid" id="main">
+            <div class="row mt-4">
+                <div class="col text-center" id="title">
+                    <h1>MarkNote</h1>
+                    <h2>Your destination for markdown document writing.</h2>
+                </div>
+            </div>
+            <div class="row mt-4">
+                <div class="col-sm">
+                    <h4>Create notes, documents, and more directly inside your Google Drive</h4>
+                </div>
+                <div class="col-sm">
+                    <h4>Many features including markdown preview, Mobile and Desktop support, and </h4>
+                </div>
+            </div>
+        </div>
+        <footer>
+            <div class="container-fluid bg-dark text-light text-center fixed-bottom">
+                <p>Created by Glenn Cottam, &copy; 2021</p>
+            </div>
+        </footer>
     </body>
 </html>

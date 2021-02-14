@@ -50,10 +50,10 @@ As of right now, I will need to do some further research to define the categorie
 
 
 # Timeline
-- [ ] Design Base UI
-- [ ] Create List of Requirements
-- [ ] Configure Node.js Webserver
-- [ ] Configure Google Cloud Platform
+- [x] Design Base UI
+- [x] Create List of Requirements
+- [x] Configure Node.js Webserver
+- [x] Configure Google Cloud Platform
 - [ ] Create Functionality to save Markdown Files to Google Drive
 - [ ] Create Account Functions for Google
 - [ ] Create basic web pages (file management)
