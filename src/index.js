@@ -1,4 +1,3 @@
-// ---------------------------------------------------------------------------
 /*
     File: index.js
     Author: Glenn Cottam
@@ -21,7 +20,11 @@ const Cors = require('cors');
 
 // Importing File System API
 console.log("\tImporting: fs");
-const FS = require('fs');
+const File_system = require('fs');
+
+// Importing Body-Parser for HTTP requests
+console.log("\tImporting: Body-Parser");
+const BodyParser = require('body-parser');
 
 // Importing ShowdownJS for Markdown > HTML conversion serverside
 console.log("\tImporting: Showdown");
@@ -34,21 +37,17 @@ var mdconverter = new showdown.Converter();
 
 // Importing Highlight.JS for Code to Text conversion
 const h1js = require('highlight.js');
-h1js.configure(
-    {
-        "useBR": true
-    }
-)
 
 // Importing Google API
 console.log("\tImporting: Google API");
 const {google} = require('googleapis');
-const client_secret = JSON.parse(FS.readFileSync('secure/client_secret.json'));
+const { type } = require('os');
+const client_secret = JSON.parse(File_system.readFileSync('secure/client_secret.json'));
 
 console.log("Import Complete. Setting Up Enviroment.");
 
 // Setting Global Values
-const config = JSON.parse(FS.readFileSync('config/global.json'));
+const config = JSON.parse(File_system.readFileSync('config/global.json'));
 const port = config.server.port;
 
 console.log("Server will be running on port: " + port);
@@ -56,7 +55,8 @@ console.log("Server will be running on port: " + port);
 // Setting Server Up
 app.use(Express.static('public'));                                              // Sets public directory
 app.use(Cors());                                                                // Sets Cors Policy
-app.set('view engine', 'ejs');                                                  // Sets EJS as view engine
+app.set('view engine', 'ejs');
+app.use(BodyParser.urlencoded());
 
 
 // Google Cloud Platform Test Function of OAuth2
@@ -90,13 +90,21 @@ app.get('/', function(req, res)
     res.render('editor', {login_url: url});
 });
 
-app.get('/mdconvert', function(req, res)
+app.post('/mdconvert', function(req, res)
 {
-    var text = req.param('text');
-    var highlight = h1js.highlightAuto(text).value;
-    var html = mdconverter.makeHtml(highlight);
+    console.log("Post Request for MD > HTML:" + req.body);
+    var text = req.body.text;
+    var html = mdconverter.makeHtml(text);
     res.send(html);
 });
+
+app.post('/highlight', function(req, res)
+{
+    console.log("Post Requst for HTML > Highlight" + req.body);
+    var code = req.body.text;
+    var html = h1js.highlightAuto(code).value;
+    res.send(html);
+})
 
 // app.get('/editor', function(req, res)
 // {

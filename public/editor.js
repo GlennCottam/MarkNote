@@ -10,16 +10,19 @@ $(document).keyup(function(e)
         }
         else
         {
-            convert();
+            convert_markdown();
         }
     }
 })
 
-function convert()
+const base_url = "https://8080-cs-329088372048-default.us-east1.cloudshell.dev/";
+var index = 0;
+
+function convert_markdown()
 {
     var settings = {
-        "url": "https://8080-cs-329088372048-default.us-east1.cloudshell.dev/mdconvert/",
-        "method": "GET",
+        "url": base_url + "mdconvert/",
+        "method": "POST",
         "timeout": 0,
         "data": {
             "text": $('#editor').val()
@@ -28,18 +31,43 @@ function convert()
 
     $.ajax(settings).done(function (response) {
         $('#editor').val('');
-        $('#viewer').append(response);
+        $('#viewer').append('<div class="d-flex flex-row"><div class="p-2 text-muted">' + index + '</div><div class="p-2">' + response + '</div></div>');
+        // $('#viewer').append(response);
         console.log(response);
-        reloadCSS();
+        // reloadCSS();
     });
 
-    // Reload CSS
-    function reloadCSS()
-    {
-        var queryString = '?reload=' + new Date().getTime();
-        $('link[rel="stylesheet"]').each(function ()
-        {
-            this.href = this.href.replace(/\?.*|$/, queryString);
-        });
+    index++;
+}
+
+function convert_hightlight()
+{
+    var settings = {
+        "url": base_url + "highlight/",
+        "method": "POST",
+        "timeout": 0,
+        "data": {
+            "text": $('#editor').val()
+        }
     }
+
+    $.ajax(settings).done(function (response) {
+        $('#editor').val('');
+        $('#viewer').append('<div class="d-flex flex-row"><div class="p-2 text-muted">' + index + '</div><div class="p-2">' + response + '</div></div>');
+        // $('#viewer').append(response);
+        console.log(response);
+        // reloadCSS();
+    });
+
+    index++;
+}
+
+// Reload CSS
+function reloadCSS()
+{
+    var queryString = '?reload=' + new Date().getTime();
+    $('link[rel="stylesheet"]').each(function ()
+    {
+        this.href = this.href.replace(/\?.*|$/, queryString);
+    });
 }

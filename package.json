@@ -4,7 +4,7 @@
   "description": "An Elegant markdown document writer",
   "main": "src/index.js",
   "scripts": {
-    "test": "nodemon -L --watch src/ --watch config/ src/index.js",
+    "test": "nodemon --watch src/ --watch config/ src/index.js",
     "start": "node src/index.js",
     "create": "gcloud app create",
     "deploy": "gcloud app deploy"
@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "@google-cloud/bigquery": "^5.5.0",
+    "body-parser": "^1.19.0",
     "cors": "^2.8.5",
     "ejs": "^3.1.5",
     "express": "^4.17.1",

@@ -24,11 +24,27 @@
         <%- include('header') %>
         <div class="container mt-4">
             <div>
-                <div class="col-sm" id="viewer"></div>
-                <div class="form-floating">
-                    <textarea class="form-control" placeholder="Start Writing!" id="editor"></textarea>
-                    <label for="editor">Add Line</label>
+                <div class="col-sm" id="viewer">
+                    <!-- <div class="d-flex flex-row">
+                        <div class="p-2 text-muted">1</div>
+                        <div class="p-2">Emmmm yess give me dat sample data daddy</div>
+                    </div> -->
+                    
                 </div>
+                <div class="input-group">
+                    <textarea class="form-control" placeholder="Start Writing!" id="editor"></textarea>
+                    <div class="input-group-append">
+                        <button class="btn btn-primary" type="button">Code</button>
+                    </div>
+
+
+                </div>
+
+                <!-- <div class="form-floating">
+                    <textarea class="form-control" placeholder="Start Writing!" id="editor"></textarea>
+                    <label for="editor">New Line</label>
+                    <button class="form-control btn btn-primary">Code</button>
+                </div> -->
             </div>
         </div>
         <%- include('footer') %>
