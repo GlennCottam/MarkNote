@@ -1,7 +1,7 @@
 {
     "server": {
         "port": 8080,
-        "url_code": "https://8080-cs-329088372048-default.us-east1.cloudshell.dev/",
-        "offical_url_code": "https://marknote.ue.r.appspot.com/code"
+        "url_code": "localhost:8080",
+        "offical_url_code": "https://marknote.ue.r.appspot.com/oauth2callback"
     }
 }

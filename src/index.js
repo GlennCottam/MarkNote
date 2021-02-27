@@ -26,6 +26,13 @@ const File_system = require('fs');
 console.log("\tImporting: Body-Parser");
 const BodyParser = require('body-parser');
 
+// Importing PATH
+console.log("\tImporting: Path");
+const path = require('path');
+
+console.log("\tImporting: URL Parser");
+const Url_Parser = require('url');
+
 // Importing ShowdownJS for Markdown > HTML conversion serverside
 console.log("\tImporting: Showdown");
 const showdown = require('showdown');
@@ -38,11 +45,12 @@ var mdconverter = new showdown.Converter();
 // Importing Highlight.JS for Code to Text conversion
 const h1js = require('highlight.js');
 
-// Importing Google API
-console.log("\tImporting: Google API");
+// Importing All that Google Stuff I need to make OAuth2 Function
+console.log("\tImporting: Google API's");
 const {google} = require('googleapis');
 const { type } = require('os');
 const client_secret = JSON.parse(File_system.readFileSync('secure/client_secret.json'));
+const {authenticate} = require('@google-cloud/local-auth');
 
 console.log("Import Complete. Setting Up Enviroment.");
 
@@ -70,24 +78,68 @@ const scopes = [
     'https://www.googleapis.com/auth/drive.metadata.readonly'
 ];
 
+const drive = google.drive({
+    version: 'v3',
+    auth: oauth2Client
+});
+
 var url = oauth2Client.generateAuthUrl
 ({
     access_type: 'online',      // 'online' (default) or 'offline (gets refresh_token)
     scope: scopes               // If you only need one scope you can pass it as a string
-}) + config.server.offical_url_code;
+// }) + config.server.offical_url_code;
+}) + "http://localhost:8080/oauth2callback";
 
 var post_data;
 
-app.post('/code', function(req, res)
+app.get('/oauth2callback', function(req, res)
 {
-    console.log(req);
+    // const {tokens} = await oauth2Client.getToken()
+    var query = Url_Parser.parse(req.url, true);
+    console.log(query);
     res.end();
+});
+
+app.get('/login', async function(req, res)
+{
+    //  Oh god here we go... This function should try to get the user to login
+    // though google and grab the Oauth2 token... I think...
+    const auth = await authenticate({
+        keyfilePath: path.join(__dirname, '../secure/oauth2.keys.json'),
+        scopes: "https://www.google.apis.com/auth/drive.metadata.readonly",
+    });
+    google.options({auth});
+
+    const service = google.drive('v3');
+    const res2 = await service.files.list({
+        pageSize: 10,
+        fields: 'nextPageToken, files(id, name)',
+    });
+    const files = res2.addTrailers.files;
+    if(files.length === 0)
+    {
+        console.log("WE AINT FOUND SHIT");
+    }
+    else
+    {
+        console.log("Files:");
+        for (const file of files)
+        {
+            console.log(`${file.name} (${file.id})`);
+        }
+    }
+
 });
 
 // Running the server
 app.get('/', function(req, res)
 {
-    res.render('editor', {login_url: url});
+    res.render('index', {login_url: url});
+});
+
+app.get('/editor', function(req, res)
+{
+    res.render('editor', {login_url: test_oauth_library()});
 });
 
 app.post('/mdconvert', function(req, res)
@@ -106,12 +158,28 @@ app.post('/highlight', function(req, res)
     res.send(html);
 })
 
-// app.get('/editor', function(req, res)
-// {
-//     res.render('editor');
-// });
-
 app.listen(port, function()
 {
     console.log("Server Ready");
 });
+
+
+// Test method for attempting to use new library
+function test_oauth_library()
+{
+    var OAuth_client_js = require('oauth2-client-js');
+    var google = new OAuth_client_js.Provider({
+        id: 'google',
+        authorization_url: 'htps://google.com/auth'
+    });
+
+    var request = new OAuth_client_js.Request({
+        client_id: client_secret.client_id,
+        redirect_uri: 'http://localhost:8080/oauth2callback'
+    });
+
+    var uri = google.requestToken(request);
+    google.remember(request);
+
+    return uri;
+}
