@@ -64,6 +64,7 @@ const {google} = require('googleapis');
 const { type } = require('os');
 const { oauth2 } = require('googleapis/build/src/apis/oauth2');
 const { error } = require('console');
+const { json } = require('body-parser');
 
 const client_secret = JSON.parse(File_system.readFileSync('secure/client_secret.json'));
 
@@ -84,17 +85,18 @@ const scopes = [
 // Generate Auth URL
 var oauth2_auth_url = oauth2Client.generateAuthUrl
 ({
-    access_type: 'offline',      // 'online' (default) or 'offline (gets refresh_token)
+    access_type: 'online',      // 'online' (default) or 'offline (gets refresh_token)
     scope: scopes               // If you only need one scope you can pass it as a string
 // }) + config.server.offical_url_code;
 }) + global_web_uri + "/oauth2callback";
+
 
 console.log("oauth2_auth_url: " + oauth2_auth_url);
 
 
 console.log("Import Complete. Setting Up Enviroment.");
 
-
+var parsed_url = {};
 
 /*
     Express Server:
@@ -112,15 +114,19 @@ app.use(BodyParser.urlencoded());
 app.get('/oauth2callback', async function(req, res)
 {
     var data = new URL(req.url, global_web_uri);
-    var parsed_url = {};
-    var code = data.searchParams.get('code');
+
+    parsed_url.code = data.searchParams.get('code');
     parsed_url.scope = data.searchParams.get('scope')
     console.log(JSON.stringify(parsed_url));
 
-    console.log("CODE: " + code);
+    console.log("CODE: " + parsed_url.code);
 
-    var {tokens} = await oauth2Client.getToken(code);
-    oauth2Client.setCredentials(tokens);
+    // var {tokens} = await oauth2Client.getToken(parsed_url.code).catch(function(err)
+    // {
+    //     console.log("Error Getting Token: " + err);
+    //     throw(err);
+    // });
+    // oauth2Client.setCredentials(tokens);
 
     // const {tokens} = {};
 
@@ -139,7 +145,11 @@ app.get('/oauth2callback', async function(req, res)
     // oauth2Client.setCredentials(tokens);
 
     // Sends user to editor
-    res.render('editor', {login_url: global_web_uri + "/login"});
+    res.redirect("/editor");
+    // res.render('editor', {
+    //     login_url: global_web_uri + "/login",
+    //     auth_code: parsed_url.code
+    // });
 });
 
 async function get_tokens(code)
@@ -168,7 +178,11 @@ app.get('/', function(req, res)
 // Direct to the Editor
 app.get('/editor', function(req, res)
 {
-    res.render('editor', {login_url: global_web_uri + "/login"});
+    // res.render('editor', {login_url: global_web_uri + "/login"});
+    res.render('editor', {
+        login_url: global_web_uri + "/login",
+        auth_code: parsed_url.code
+    });
 });
 
 // Request for markdown conversion
@@ -196,11 +210,11 @@ app.listen(port, function()
 });
 
 
-// oauth2Client.on('tokens', (tokens) =>
-// {
-//     if(tokens.refresh_token)
-//     {
-//         console.log(tokens.refresh_token);
-//     }
-//     console.log(tokens.access_token);
-// })
+oauth2Client.on('tokens', (tokens) =>
+{
+    if(tokens.refresh_token)
+    {
+        console.log(tokens.refresh_token);
+    }
+    console.log(tokens.access_token);
+})
