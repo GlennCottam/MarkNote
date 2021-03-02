@@ -50,6 +50,24 @@ const h1js = require('highlight.js');
 // Setting Global Values
 const config = JSON.parse(File_system.readFileSync('config/global.json'));
 const port = config.server.port;
+const client_secret = JSON.parse(File_system.readFileSync('secure/client_secret.json'));
+
+console.log("\tImporting: Passport Authentication");
+const Passport = require('passport');
+var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
+
+Passport.use(new GoogleStrategy({
+    clientID: client_secret.web.client_id,
+    clientSecret: client_secret.web.client_secret,
+    callbackURL: global_web_uri + "/oauth2callback"
+},
+    function(accessToken, refreshToken, profile, done){
+        User.findorCreate({googleId: profile.id}, function(err, user)
+        {
+            return done(err, user)
+        })
+    }
+));
 
 /*
     Importing Google API's:
@@ -61,12 +79,9 @@ const port = config.server.port;
 */
 console.log("\tImporting: Google API's");
 const {google} = require('googleapis');
-const { type } = require('os');
-const { oauth2 } = require('googleapis/build/src/apis/oauth2');
-const { error } = require('console');
-const { json } = require('body-parser');
 
-const client_secret = JSON.parse(File_system.readFileSync('secure/client_secret.json'));
+
+
 
 // Google Cloud Platform Test Function of OAuth2
 const oauth2Client = new google.auth.OAuth2(
@@ -78,6 +93,7 @@ const oauth2Client = new google.auth.OAuth2(
 
 // GCloud Assign GDrive scope
 const scopes = [
+    'https://www.googleapis.com/auth/userinfo.profile',
     'https://www.googleapis.com/auth/drive.appdata',
     'https://www.googleapis.com/auth/drive.file'
 ];
@@ -111,46 +127,46 @@ app.use(BodyParser.urlencoded());
 
 
 // Listens for the callback for Oauth2
-app.get('/oauth2callback', async function(req, res)
-{
-    var data = new URL(req.url, global_web_uri);
+// app.get('/oauth2callback', async function(req, res)
+// {
+//     var data = new URL(req.url, global_web_uri);
 
-    parsed_url.code = data.searchParams.get('code');
-    parsed_url.scope = data.searchParams.get('scope')
-    console.log(JSON.stringify(parsed_url));
+//     parsed_url.code = data.searchParams.get('code');
+//     parsed_url.scope = data.searchParams.get('scope')
+//     console.log(JSON.stringify(parsed_url));
 
-    console.log("CODE: " + parsed_url.code);
+//     console.log("CODE: " + parsed_url.code);
 
-    // var {tokens} = await oauth2Client.getToken(parsed_url.code).catch(function(err)
-    // {
-    //     console.log("Error Getting Token: " + err);
-    //     throw(err);
-    // });
-    // oauth2Client.setCredentials(tokens);
+//     // var {tokens} = await oauth2Client.getToken(parsed_url.code).catch(function(err)
+//     // {
+//     //     console.log("Error Getting Token: " + err);
+//     //     throw(err);
+//     // });
+//     // oauth2Client.setCredentials(tokens);
 
-    // const {tokens} = {};
+//     // const {tokens} = {};
 
-    // try {
-    //     tokens = await oauth2Client.getToken(code)
-    //     console.log("response: " + response);
-    // } catch (error)
-    // {
-    //     console.log("error: " + error);
-    // }
+//     // try {
+//     //     tokens = await oauth2Client.getToken(code)
+//     //     console.log("response: " + response);
+//     // } catch (error)
+//     // {
+//     //     console.log("error: " + error);
+//     // }
  
-    // oauth2Client.setCredentials(tokens);
-    // get_tokens(JSON.stringify(parsed_url.code));
+//     // oauth2Client.setCredentials(tokens);
+//     // get_tokens(JSON.stringify(parsed_url.code));
     
-    // var {tokens} = oauth2Client.getToken(parsed_url.code);
-    // oauth2Client.setCredentials(tokens);
+//     // var {tokens} = oauth2Client.getToken(parsed_url.code);
+//     // oauth2Client.setCredentials(tokens);
 
-    // Sends user to editor
-    res.redirect("/editor");
-    // res.render('editor', {
-    //     login_url: global_web_uri + "/login",
-    //     auth_code: parsed_url.code
-    // });
-});
+//     // Sends user to editor
+//     res.redirect("/editor");
+//     // res.render('editor', {
+//     //     login_url: global_web_uri + "/login",
+//     //     auth_code: parsed_url.code
+//     // });
+// });
 
 async function get_tokens(code)
 {
@@ -164,10 +180,23 @@ async function get_tokens(code)
 }
 
 // Login Redirect for OAuth2
-app.get('/login', async function(req, res)
+// app.get('/login', function(req, res)
+// {
+
+// });
+
+/*
+    !PASSPORT TESTING
+*/
+
+app.get('/login', Passport.authenticate('google', {scope: scopes}));
+
+app.get('/oauth2callback', Passport.authenticate('google', {failureRedirect: '/'}), function(req, res)
 {
-    res.redirect(oauth2_auth_url);
+    res.redirect('/');
 });
+
+
 
 // Running the server
 app.get('/', function(req, res)
@@ -180,9 +209,7 @@ app.get('/editor', function(req, res)
 {
     // res.render('editor', {login_url: global_web_uri + "/login"});
     res.render('editor', {
-        login_url: global_web_uri + "/login",
-        auth_code: parsed_url.code
-    });
+        login_url: global_web_uri + "/login"});
 });
 
 // Request for markdown conversion
