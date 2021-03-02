@@ -1,7 +1,9 @@
 {
     "server": {
         "port": 8080,
-        "url_code": "localhost:8080",
-        "offical_url_code": "https://marknote.ue.r.appspot.com/oauth2callback"
+        "uri": {
+            "local": "http://localhost",
+            "prodcution": "https://marknote.ue.r.appspot.com"
+        }
     }
 }

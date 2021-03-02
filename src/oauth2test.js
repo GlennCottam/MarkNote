@@ -7,19 +7,6 @@ const Passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 const passport = require('passport');
 const {Datastore} = require('@google-cloud/datastore')
-
-// Passport.use(new GoogleStrategy({
-//     clientID: "498580518200-u42iatg215hij6n6u73gnfv7f0kdlshr.apps.googleusercontent.com",
-//     clientSecret: "4CXu3HxGI5XW1LaeIiLaa_rH",
-//     callbackURL: "http://localhost:8080/oauth2callback",
-//     passReqToCallback: true
-// }, function(accessToken, refreshToken, profile, done){
-//     console.log(JSON.stringify(profile));
-//     User.findOrCreate({googleId: profile.id}, function(err, user){
-//         return done(err, user);
-//     })
-// }));
-
 const datastore = new Datastore();
 
 
@@ -36,13 +23,8 @@ Passport.use(new GoogleStrategy({
         });
         console.log(JSON.stringify(profile));
         return done();
-        // User.findorCreate({ googleId: profile.id }, function (err, user) {
-        //     return done(err, user);
-        // });
   }
 ));
-
-
 
 passport.serializeUser(function(user, done) {
     done(null, user.id);
@@ -92,12 +74,6 @@ App.get('/oauth2callback',
         failureRedirect: '/error'
     }
 ));
-
-// App.get('/login', Passport.authenticate('google', {scope: ['drive']));
-// App.get('/oauth2callback', Passport.authenticate('google', {failureRedirect: '/error'}), function(req, res){
-//     res.redirect('/');
-// })
-
 
 App.get('/', function(req, res)
 {
