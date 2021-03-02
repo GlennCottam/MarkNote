@@ -6,7 +6,7 @@
 	],
 	"settings": {
 		"files.autoSave": "off",
-        "git.enabled": true,
+        "git.enabled": false,
         "editor.fontSize": 12,
 	},
 	"launch": {

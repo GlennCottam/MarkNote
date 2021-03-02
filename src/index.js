@@ -85,6 +85,7 @@ const datastore = new Datastore();
 console.log("\tImporting: Passport Authentication");
 const Passport = require('passport');
 var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
+const { authorize, session } = require('passport');
 
 Passport.use(new GoogleStrategy({
     clientID: client_secret.web.client_id,
@@ -150,6 +151,33 @@ app.get('/get/logins', async function(req, res)
     data = await datastore.runQuery(query);
 
     res.json(data);
+    res.end();
+});
+
+app.get('/get/drivedata', function(req, res)
+{
+    const files = null;
+    const drive = google.drive({version: 'v3'});
+    drive.files.list({
+        pageSize: 10,
+        fields: 'nextPageToken, files(id, name)'
+    }, (err, res) => {
+        if(err) console.log("API returned an error: " + err);
+        files = res.data.files;
+        if(files.length)
+        {
+            console.log("Files:");
+            files.map((file) =>
+            {
+                console.log('${filename} (${file.id})');
+            });
+        } else
+        {
+            console.log("No files Found");
+        }
+    });
+
+    res.json(files);
     res.end();
 });
 
