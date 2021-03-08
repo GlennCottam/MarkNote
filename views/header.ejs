@@ -5,7 +5,15 @@
             <div>
                 <button class="btn btn-primary" onclick="window.open('/', '_parent')">Home</button>
                 <button class="btn btn-primary" onclick="window.open('https://github.com/GlennCottam/MarkNote', 'blank')"></i>&nbsp;View On Github</button>
-                <button class="btn bg-primary text-white" onclick="window.open('/login', '_blank')">Login</button>
+                <% if(user) {%>
+                    <!-- <p class="text-white"><%= user.id %></p> -->
+                    <button class="btn bg-success text-white" onclick="window.open('/editor', '_parent')">Editor</button>
+                    <button class="btn bg-danger text-white" onclick="window.open('/logout', '_parent')">Logout</button>
+                
+                <% } else { %>
+                    <button class="btn bg-success text-white" onclick="window.open('/login', '_parent')">Login</button>
+                <% }%>
+
             </div>
         </div>
     </nav>

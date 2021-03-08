@@ -22,6 +22,9 @@ const Cors = require('cors');
 console.log("\tImporting: fs");
 const File_system = require('fs');
 
+console.log("\tImporting: cookie-session");
+const cookieSession = require('cookie-session');
+
 // Setting Global Values
 const config = JSON.parse(File_system.readFileSync('config/global.json'));
 const port = config.server.port;
@@ -84,23 +87,8 @@ const datastore = new Datastore();
 */
 console.log("\tImporting: Passport Authentication");
 const Passport = require('passport');
-var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
-const { authorize, session } = require('passport');
-
-Passport.use(new GoogleStrategy({
-    clientID: client_secret.web.client_id,
-    clientSecret: client_secret.web.client_secret,
-    callbackURL: global_web_uri + "/oauth2callback"
-},
-    function(accessToken, refreshToken, profile, done){
-        // datastore.save({
-        //     key: datastore.key('googleId'),
-        //     data: profile
-        // });
-
-        return done();
-    }
-));
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const keys = require('../secure/keys');
 
 console.log("Import Complete.");
 
@@ -109,6 +97,55 @@ console.log("Import Complete.");
                             Main Application
 ===============================================================================
 */
+
+
+// Main function for login of users
+// https://dev.to/phyllis_yym/beginner-s-guide-to-google-oauth-with-passport-js-2gh4
+Passport.use(new GoogleStrategy(
+    {
+        clientID: keys.google.clientID,
+        clientSecret: keys.google.clientSecret,
+        callbackURL: "/oauth2callback"
+    },
+    (accessToken, refreshToken, profile, done) => 
+    {
+
+        var userKey = datastore.key(['googleId', profile.id])
+
+        var user = 
+        {
+            id: profile.id,
+            accessToken: accessToken,
+            refreshToken: refreshToken,
+            profile: profile
+        };
+        
+        console.log("Creating User: " + profile.id);
+        datastore.save({
+            key: userKey,
+            data: user
+        });
+
+        
+        done(null, user);
+    }
+));
+
+// Serialize User
+Passport.serializeUser((user, done) =>
+{
+    done(null, user.id);
+});
+
+// Deseralize User
+Passport.deserializeUser((id, done) =>
+{
+    // Find on database
+    var userKey = datastore.key(['googleId', id])
+    var user = datastore.get(userKey);
+    done(null, user);
+});
+
 
 /*
     Express Server:
@@ -119,6 +156,12 @@ app.use(Express.static('public'));                                              
 app.use(Cors());                                                                // Sets Cors Policy
 app.set('view engine', 'ejs');
 app.use(BodyParser.urlencoded());
+app.use(cookieSession({
+    maxAge: 24*60*60*1000,
+    keys: [keys.session.cookieKey]
+}));
+app.use(Passport.initialize());
+app.use(Passport.session());
 
 
 /*
@@ -137,11 +180,23 @@ app.get(
     }
 );
 
+// Endpoint '/oauth2callback': Endpoint to grab the code for Oauth2.
+app.get(
+    '/oauth2callback',
+    Passport.authenticate('google'), (req, res) =>
+    {
+        // res.send(req.user);
+        // res.send("Redirect URI!");
+        res.redirect('/');
+    }
+);
+
 // Endpoint: '/logout': Allows the user to logout of their account.
 app.get('/logout', function(req, res)
 {
     console.log("Accessed '/logout'");
     req.logout();
+    // res.send(req.user);
     res.redirect('/');
 });
 
@@ -154,7 +209,7 @@ app.get('/get/logins', async function(req, res)
     res.end();
 });
 
-app.get('/get/drivedata', function(req, res)
+app.get('/get/drivedata', Passport.authenticate('google', {scope: scopes}), (req, res) =>
 {
     const files = null;
     const drive = google.drive({version: 'v3'});
@@ -181,16 +236,21 @@ app.get('/get/drivedata', function(req, res)
     res.end();
 });
 
-// Endpoint '/oauth2callback': Endpoint to grab the code for Oauth2.
-app.get(
-    '/oauth2callback',
-    Passport.authenticate('google', {failureRedirect: '/error', successRedirect: '/editor'})
-);
+
 
 // Endpoint: '/': Landing page for the application. Anyone can access.
 app.get('/', function(req, res)
 {
-    res.render('index');
+    // If Logged in:
+    if(req.user)
+    {
+        res.render('index', {user: req.user});
+    }
+    else
+    {
+        res.render('index', {user: null});
+    }
+    
 });
 
 // Endpoint: '/editor': used to access the editor. This will most likely change.
