@@ -4,6 +4,8 @@ const cors = require('cors');
 const Keys = require('../secure/keys');
 const {google} = require('googleapis');
 const drive = google.drive('v3');
+const {Datastore} = require('@google-cloud/datastore');
+const datastore = new Datastore();
 
 const oauth2Client = new google.auth.OAuth2(
     Keys.google.clientID,
@@ -14,7 +16,8 @@ const oauth2Client = new google.auth.OAuth2(
 const scopes = [
     'https://www.googleapis.com/auth/userinfo.profile',     // User Profile, Needed for everything to work.
     'https://www.googleapis.com/auth/drive.appdata',        // Drive Appdata
-    'https://www.googleapis.com/auth/drive.file'            // Drive files (save, read, modify etc...)
+    'https://www.googleapis.com/auth/drive.file',            // Drive files (save, read, modify etc...)
+    'https://www.googleapis.com/auth/drive'
 ];
 
 const url = oauth2Client.generateAuthUrl({
@@ -55,12 +58,11 @@ app.get('/get/drivedata', async function (req, res)
 
     var files = null;
     google.options({auth: oauth2Client});
-    var params = {pageSize: 10};
-    // params.q = query;
+    var params = {};
     files = await drive.files.list(params);
 
     
-    res.json(files);
+    res.json(files.data);
     res.end();
 });
 
@@ -68,4 +70,54 @@ app.get('/get/drivedata', async function (req, res)
 app.listen(8080, function()
 {
     console.log("ready");
+});
+
+
+
+Passport.use(new GoogleStrategy(
+    {
+        clientID: keys.google.clientID,
+        clientSecret: keys.google.clientSecret,
+        callbackURL: "/oauth2callback"
+    },
+    (accessToken, refreshToken, profile, done) => 
+    {
+
+        var userKey = datastore.key(['googleId', profile.id])
+
+        var user = 
+        {
+            id: profile.id,
+            accessToken: accessToken,
+            refreshToken: refreshToken,
+            profile: profile
+        };
+        
+        console.log("Creating User: " + profile.id);
+        datastore.save({
+            key: userKey,
+            data: user
+        });
+
+        
+        done(null, user);
+    }
+));
+
+// Serialize User
+Passport.serializeUser((user, done) =>
+{
+    done(null, user.id);
+});
+
+// Deseralize User
+Passport.deserializeUser(async function (id, done)
+{
+    // Find on database
+    var userKey = datastore.key(['googleId', id]);
+    var query = datastore.createQuery('googleId');
+    const [users] = await datastore.runQuery(query);
+    var user = users[0]; // !TODO: Fix this garbage (not safe).
+    // console.log("!!!!!!!DeserializeUser:\n\tUSER: " + JSON.stringify(user) + "\n\tID: " + id);
+    done(null, user);
 });

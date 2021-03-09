@@ -7,12 +7,24 @@
     V 0.0.1
 */
 
+console.log(
+    "---------------------------------\n" +
+    "░█▄█░█▀█░█▀▄░█░█░█▀█░█▀█░▀█▀░█▀▀\n" + 
+    "░█░█░█▀█░█▀▄░█▀▄░█░█░█░█░░█░░█▀▀\n" + 
+    "░▀░▀░▀░▀░▀░▀░▀░▀░▀░▀░▀▀▀░░▀░░▀▀▀\n" + 
+    "Created by: Glenn Cottam\n" +
+    "MIT License\n" + 
+    "---------------------------------"
+);
+
+
 // Debug Statement for following imported packages
 console.log("Server Starting, Importing Tools.\n\tImporting: Express");
 
 // Importing Express Webserver
 const Express = require('express');
 const app = Express();
+const session = require('express-session');
 
 // Importing Cors Policy
 console.log("\tImporting: Cors");
@@ -22,14 +34,11 @@ const Cors = require('cors');
 console.log("\tImporting: fs");
 const File_system = require('fs');
 
-console.log("\tImporting: cookie-session");
-const cookieSession = require('cookie-session');
-
 // Setting Global Values
 const config = JSON.parse(File_system.readFileSync('config/global.json'));
 const port = config.server.port;
 const keys = require('../secure/keys');
-const client_secret = JSON.parse(File_system.readFileSync('secure/client_secret.json'));
+// const client_secret = JSON.parse(File_system.readFileSync('secure/client_secret.json'));
 
 // GCloud scopes
 const scopes = [
@@ -43,7 +52,7 @@ const scopes = [
 */
 const global_web_uri = config.server.uri.local + ":" + port; // Comment Out When In production
 // const global_web_uri = config.server.uri.production;      // Uncomment out when in production
-console.log("Server URI: " + global_web_uri);                // Server confirmation on running the correct URI
+// console.log("Server URI: " + global_web_uri);                // Server confirmation on running the correct URI
 
 // Importing Body-Parser for HTTP requests
 console.log("\tImporting: Body-Parser");
@@ -78,23 +87,22 @@ const h1js = require('highlight.js');
 */
 console.log("\tImporting: Google API's");
 const {google} = require('googleapis');
+const drive = google.drive('v3');
 const {Datastore} = require('@google-cloud/datastore');
 const datastore = new Datastore();
+
 const oauth2Client = new google.auth.OAuth2(
-    keys.clientID,
-    keys.clientSecret,
-    keys.redirectURL,
+    keys.google.clientID,
+    keys.google.clientSecret,
+    keys.google.redirectURL,
 );
 
+const global_auth_url = oauth2Client.generateAuthUrl({
+    access_type: 'online',
+    scope: scopes
+});
 
-/*
-    Passport Framwork:
-        This framework does all the automation of handling tokens and is honestly
-        sick as hell. Would highly recommend it for Oauth2.
-*/
-console.log("\tImporting: Passport Authentication");
-const Passport = require('passport');
-const GoogleStrategy = require('passport-google-oauth20').Strategy;
+google.options({auth: oauth2Client});
 
 console.log("Import Complete.");
 
@@ -105,73 +113,37 @@ console.log("Import Complete.");
 */
 
 
-// Main function for login of users
-// https://dev.to/phyllis_yym/beginner-s-guide-to-google-oauth-with-passport-js-2gh4
-Passport.use(new GoogleStrategy(
-    {
-        clientID: keys.google.clientID,
-        clientSecret: keys.google.clientSecret,
-        callbackURL: "/oauth2callback"
-    },
-    (accessToken, refreshToken, profile, done) => 
-    {
-
-        var userKey = datastore.key(['googleId', profile.id])
-
-        var user = 
-        {
-            id: profile.id,
-            accessToken: accessToken,
-            refreshToken: refreshToken,
-            profile: profile
-        };
-        
-        console.log("Creating User: " + profile.id);
-        datastore.save({
-            key: userKey,
-            data: user
-        });
-
-        
-        done(null, user);
-    }
-));
-
-// Serialize User
-Passport.serializeUser((user, done) =>
-{
-    done(null, user.id);
-});
-
-// Deseralize User
-Passport.deserializeUser(async function (id, done)
-{
-    // Find on database
-    var userKey = datastore.key(['googleId', id]);
-    var query = datastore.createQuery('googleId');
-    const [users] = await datastore.runQuery(query);
-    var user = users[0]; // !TODO: Fix this garbage (not safe).
-    // console.log("!!!!!!!DeserializeUser:\n\tUSER: " + JSON.stringify(user) + "\n\tID: " + id);
-    done(null, user);
-});
-
-
-
 /*
     Express Server:
         Below are the URL access points the server will listen for.
 */
 // Setting up the server with frameworks
 app.use(Express.static('public'));                                              // Sets public directory
-app.use(Cors());                                                                // Sets Cors Policy
+app.use(Cors());        
+app.enable('trust proxy');                                                        // Sets Cors Policy
 app.set('view engine', 'ejs');
-app.use(BodyParser.urlencoded());
-app.use(cookieSession({
-    maxAge: 24*60*60*1000,
-    keys: [keys.session.cookieKey]
+app.use(session({
+    secret: keys.session.cookieKey,
+    name: 'MarkNote', 
+    resave: true, 
+    saveUninitialized: true,
+    cookie: 
+    {
+        secure: false,
+        path: '/',
+        sameSite: true
+    }
 }));
-app.use(Passport.initialize());
-app.use(Passport.session());
+
+// app.use(function(req, res, next)
+// {
+//     if(!req.session.user)
+//     {
+//         req.session.user = {}
+        
+//     }
+//     next();
+// });
 
 /*
     The Server Itself:
@@ -180,32 +152,100 @@ app.use(Passport.session());
 */
 
 // Endoint: '/login': The login endpoint will focus on logging the user in.
-app.get(
-    '/login',
-    Passport.authenticate('google', {scope: scopes}),
-    function(req, res)
-    {
-        console.log("ENDPOINT: '/login'");
-        // req.redirect('/editor');
-    }
-);
+// app.get(
+//     '/login',
+//     Passport.authenticate('google', {scope: scopes}),
+//     function(req, res)
+//     {
+//         console.log("ENDPOINT: '/login'");
+//         // req.redirect('/editor');
+//     }
+// );
+
+// Endoint: '/login': The login endpoint will focus on logging the user in.
+app.get('/login', function(req, res)
+{
+    console.log("ENDPOINT: '/login'");
+    res.redirect(global_auth_url);
+});
 
 // Endpoint '/oauth2callback': Endpoint to grab the code for Oauth2.
-app.get(
-    '/oauth2callback',
-    Passport.authenticate('google'), (req, res) =>
+app.get('/oauth2callback', async function(req, res)
+{
+    console.log("ENDPOINT: '/oauth2callback'");
+    var code = req.query.code;
+    var {tokens} = await oauth2Client.getToken(code);
+    oauth2Client.setCredentials(tokens);
+
+
+    // Database user entry
+    var user = await google.people('v1').people.get({
+        resourceName: 'people/me',
+        personFields: 'clientData,names,nicknames,photos,externalIds'
+    });
+    var user_id = user.data.resourceName.replace('people/', '');
+    console.log("User ID: " + user_id);
+
+    var userKey = datastore.key(['googleId', user_id]);
+
+    var user_data = 
     {
-        // res.send(req.user);
-        // res.send("Redirect URI!");
-        res.redirect('/');
-    }
-);
+        id: user_id,
+        tokens: {tokens},
+        profile: user.data
+    };
+
+    console.log("Entering User into Database: " + user_id);
+
+    // datastore.save({
+    //     key: userKey,
+    //     data: user_data
+    // });
+
+    // res.json(user);
+    // res.end();
+    // req.session.save(function(err)
+    // {
+    //     if(err) throw err;
+        
+    // });
+
+    // console.log("Session ID: " + req.session.id);
+
+    req.session.user = user_data;
+    // req.session.save(function(err)
+    // {
+    //     if(err) throw err;
+    // });
+
+    console.log("User Data from Session: " + JSON.stringify(req.session) + "\nID: " + req.session.id);
+
+    // res.json(user);
+    // res.end();
+
+    res.redirect('/');
+
+});
+
+// app.get(
+//     '/oauth2callback',
+//     Passport.authenticate('google'), (req, res) =>
+//     {
+//         // res.send(req.user);
+//         // res.send("Redirect URI!");
+//         res.redirect('/');
+//     }
+// );
 
 // Endpoint: '/logout': Allows the user to logout of their account.
 app.get('/logout', function(req, res)
 {
     console.log("Accessed '/logout'");
-    req.logout();
+    // req.logout();
+    req.session.destroy(function(err)
+    {
+        if(err) {throw err};
+    });
     // res.send(req.user);
     res.redirect('/');
 });
@@ -219,34 +259,15 @@ app.get('/get/logins', async function(req, res)
     res.end();
 });
 
-app.get('/get/drivedata', function (req, res)
+app.get('/get/drivedata', async function (req, res)
 {
-    // console.log("shite: " + JSON.stringify(req.user));
-    // const {tokens} = await oauth2Client.getToken()
-    oauth2Client.setCredentials(req.user.accessToken, req.user.refreshToken);
+    var files = null;
+    google.options({auth: oauth2Client});
+    var params = {};
+    files = await drive.files.list(params);
 
-    const files = null;
-    const drive = google.drive({version: 'v3', oauth2Client});
-    drive.files.list({
-        pageSize: 10,
-        fields: 'nextPageToken, files(id, name)'
-    }, (err, res) => {
-        if(err) console.log("API returned an error: " + err);
-        files = res.data.files;
-        if(files.length)
-        {
-            console.log("Files:");
-            files.map((file) =>
-            {
-                console.log('${filename} (${file.id})');
-            });
-        } else
-        {
-            console.log("No files Found");
-        }
-    });
-
-    res.json(files);
+    
+    res.json(files.data);
     res.end();
 });
 
@@ -255,10 +276,13 @@ app.get('/get/drivedata', function (req, res)
 // Endpoint: '/': Landing page for the application. Anyone can access.
 app.get('/', function(req, res)
 {
+    
+    console.log("User Data from Session: " + JSON.stringify(req.session) + "\nID: " + req.session.id);
+
     // If Logged in:
-    if(req.user)
+    if(req.session.user)
     {
-        res.render('index', {user: req.user});
+        res.render('index', {user: req.session.user});
     }
     else
     {
