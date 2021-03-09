@@ -354,13 +354,14 @@ app.get('/new', async function(req, res)
 
 app.get('/picker', function(req, res)
 {
-    res.render('picker', {keys: keys});
+    res.render('picker', {user: req.session.user});
 });
 
 // Endpoint: '/editor': used to access the editor. This will most likely change.
 app.get('/editor', function(req, res)
 {
 
+    // TODO: Add some sort of query that opens up the ID of the file in the editor
     // res.render('editor', {login_url: global_web_uri + "/login"});
     if(req.session.user)
     {

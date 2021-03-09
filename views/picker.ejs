@@ -11,7 +11,6 @@
     var developerKey = 'AIzaSyADlVRCc63M-zJ64t--JuJkkPhrQIf3eEA';
 
     // The Client ID obtained from the Google API Console. Replace with your own Client ID.
-    var clientId = "<%=keys.google.clientID%>"
 
     // Replace with your own project number from console.developers.google.com.
     // See "Project number" under "IAM & Admin" > "Settings"
@@ -21,34 +20,17 @@
     var scope = ['https://www.googleapis.com/auth/drive.file'];
 
     var pickerApiLoaded = false;
-    var oauthToken;
+    var oauthToken = "<%=user.tokens.tokens.access_token%>";
 
     // Use the Google API Loader script to load the google.picker script.
     function loadPicker() {
-      gapi.load('auth', {'callback': onAuthApiLoad});
+    //   gapi.load('auth', {'callback': onAuthApiLoad});
       gapi.load('picker', {'callback': onPickerApiLoad});
-    }
-
-    function onAuthApiLoad() {
-      window.gapi.auth.authorize(
-          {
-            'client_id': clientId,
-            'scope': scope,
-            'immediate': false
-          },
-          handleAuthResult);
     }
 
     function onPickerApiLoad() {
       pickerApiLoaded = true;
       createPicker();
-    }
-
-    function handleAuthResult(authResult) {
-      if (authResult && !authResult.error) {
-        oauthToken = authResult.access_token;
-        createPicker();
-      }
     }
 
     // Create and render a Picker object for searching images.
@@ -80,7 +62,9 @@
   </head>
   <body>
     <div id="result"></div>
-
+        <div>
+            <%=JSON.stringify(user.tokens.tokens.access_token)%>
+        </div>
     <!-- The Google API Loader script. -->
     <script type="text/javascript" src="https://apis.google.com/js/api.js?onload=loadPicker"></script>
   </body>
