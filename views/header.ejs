@@ -3,16 +3,17 @@
         <div class="container-fluid">
             <h1 class="navbar-brand">MarkNote</h1>
             <div>
-                <button class="btn btn-primary" onclick="window.open('/', '_parent')">Home</button>
-                <button class="btn btn-primary" onclick="window.open('https://github.com/GlennCottam/MarkNote', 'blank')"></i>&nbsp;View On Github</button>
+                <button class="btn btn-primary" onclick="window.open('/', '_parent')"><i class="fas fa-home"></i>&nbsp;Home</button>
+                <button class="btn btn-primary" onclick="window.open('https://github.com/GlennCottam/MarkNote', 'blank')"><i class="fab fa-github"></i>&nbsp;View On Github</button>
                 <% if(user) {%>
                     <!-- <p class="text-white"><%= user.id %></p> -->
-                    <button class="btn bg-success text-white" onclick="window.open('/editor', '_parent')">Editor</button>
-                    <button class="btn bg-danger text-white" onclick="window.open('/logout', '_parent')">Logout</button>
-                    <button class="btn bg-danger text-white" onclick="window.open('/get/drivedata', '_parent')">DATA</button>
+                    <button class="btn bg-success text-white" onclick="window.open('/editor', '_parent')"><i class="fas fa-edit"></i>&nbsp;Editor</button>
+                    <button class="btn bg-danger text-white" onclick="window.open('/logout', '_parent')"><i class="fas fa-sign-out-alt"></i>&nbsp;Logout</button>
+                    <!-- <button class="btn bg-danger text-white" onclick="window.open('/get/drivedata', '_parent')">DATA</button> -->
+                    
                 
                 <% } else { %>
-                    <button class="btn bg-success text-white" onclick="window.open('/login', '_parent')">Login</button>
+                    <button class="btn bg-success text-white" onclick="window.open('/login', '_parent')"><i class="fas fa-sign-in-alt"></i>&nbsp;Login</button>
                 <% }%>
 
             </div>

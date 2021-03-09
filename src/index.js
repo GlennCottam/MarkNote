@@ -135,32 +135,11 @@ app.use(session({
     }
 }));
 
-// app.use(function(req, res, next)
-// {
-//     if(!req.session.user)
-//     {
-//         req.session.user = {}
-        
-//     }
-//     next();
-// });
-
 /*
     The Server Itself:
         Below are the endpoints the server will listen too. These endpoints will
         do different things like login, editor etc...
 */
-
-// Endoint: '/login': The login endpoint will focus on logging the user in.
-// app.get(
-//     '/login',
-//     Passport.authenticate('google', {scope: scopes}),
-//     function(req, res)
-//     {
-//         console.log("ENDPOINT: '/login'");
-//         // req.redirect('/editor');
-//     }
-// );
 
 // Endoint: '/login': The login endpoint will focus on logging the user in.
 app.get('/login', function(req, res)
@@ -172,21 +151,23 @@ app.get('/login', function(req, res)
 // Endpoint '/oauth2callback': Endpoint to grab the code for Oauth2.
 app.get('/oauth2callback', async function(req, res)
 {
+    // Grabs the Code from Google, turns it in for a token
     console.log("ENDPOINT: '/oauth2callback'");
     var code = req.query.code;
     var {tokens} = await oauth2Client.getToken(code);
     oauth2Client.setCredentials(tokens);
 
-
-    // Database user entry
+    // Grabs user information, sets it in the express-session
     var user = await google.people('v1').people.get({
         resourceName: 'people/me',
         personFields: 'clientData,names,nicknames,photos,externalIds'
     });
+
+    // Gotta love lame API's, I need to trim "people/" from the ID.
+    // Before: people/<googleid>
+    // After: <googleid>
     var user_id = user.data.resourceName.replace('people/', '');
     console.log("User ID: " + user_id);
-
-    var userKey = datastore.key(['googleId', user_id]);
 
     var user_data = 
     {
@@ -197,49 +178,16 @@ app.get('/oauth2callback', async function(req, res)
 
     console.log("Entering User into Database: " + user_id);
 
-    // datastore.save({
-    //     key: userKey,
-    //     data: user_data
-    // });
-
-    // res.json(user);
-    // res.end();
-    // req.session.save(function(err)
-    // {
-    //     if(err) throw err;
-        
-    // });
-
-    // console.log("Session ID: " + req.session.id);
-
     req.session.user = user_data;
-    // req.session.save(function(err)
-    // {
-    //     if(err) throw err;
-    // });
-
-    console.log("User Data from Session: " + JSON.stringify(req.session) + "\nID: " + req.session.id);
-
-    // res.json(user);
-    // res.end();
-
     res.redirect('/');
 
 });
 
-// app.get(
-//     '/oauth2callback',
-//     Passport.authenticate('google'), (req, res) =>
-//     {
-//         // res.send(req.user);
-//         // res.send("Redirect URI!");
-//         res.redirect('/');
-//     }
-// );
-
 // Endpoint: '/logout': Allows the user to logout of their account.
 app.get('/logout', function(req, res)
 {
+    // TODO: When logout: deauth app so they can choose another account
+
     console.log("Accessed '/logout'");
     // req.logout();
     req.session.destroy(function(err)
@@ -248,15 +196,6 @@ app.get('/logout', function(req, res)
     });
     // res.send(req.user);
     res.redirect('/');
-});
-
-app.get('/get/logins', async function(req, res)
-{
-    const query = datastore.createQuery('googleId');
-    data = await datastore.runQuery(query);
-
-    res.json(data);
-    res.end();
 });
 
 app.get('/get/drivedata', async function (req, res)
@@ -270,7 +209,6 @@ app.get('/get/drivedata', async function (req, res)
     res.json(files.data);
     res.end();
 });
-
 
 
 // Endpoint: '/': Landing page for the application. Anyone can access.
