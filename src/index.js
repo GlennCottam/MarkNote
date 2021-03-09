@@ -41,10 +41,15 @@ const keys = require('../secure/keys');
 // const client_secret = JSON.parse(File_system.readFileSync('secure/client_secret.json'));
 
 // GCloud scopes
+// const scopes = [
+//     'https://www.googleapis.com/auth/userinfo.profile',     // User Profile, Needed for everything to work.
+//     'https://www.googleapis.com/auth/drive.appdata',        // Drive Appdata
+//     'https://www.googleapis.com/auth/drive.file'            // Drive files (save, read, modify etc...)
+// ];
+
 const scopes = [
     'https://www.googleapis.com/auth/userinfo.profile',     // User Profile, Needed for everything to work.
-    'https://www.googleapis.com/auth/drive.appdata',        // Drive Appdata
-    'https://www.googleapis.com/auth/drive.file'            // Drive files (save, read, modify etc...)
+    'https://www.googleapis.com/auth/drive',        // Drive data
 ];
 
 /* 
@@ -135,6 +140,12 @@ app.use(session({
     }
 }));
 
+app.use(function(req, res, next)
+{
+    console.log("REQUEST: " + req.url);
+    next();
+})
+
 /*
     The Server Itself:
         Below are the endpoints the server will listen too. These endpoints will
@@ -144,7 +155,7 @@ app.use(session({
 // Endoint: '/login': The login endpoint will focus on logging the user in.
 app.get('/login', function(req, res)
 {
-    console.log("ENDPOINT: '/login'");
+    // console.log("ENDPOINT: '/login'");
     res.redirect(global_auth_url);
 });
 
@@ -152,7 +163,7 @@ app.get('/login', function(req, res)
 app.get('/oauth2callback', async function(req, res)
 {
     // Grabs the Code from Google, turns it in for a token
-    console.log("ENDPOINT: '/oauth2callback'");
+    // console.log("ENDPOINT: '/oauth2callback'");
     var code = req.query.code;
     var {tokens} = await oauth2Client.getToken(code);
     oauth2Client.setCredentials(tokens);
@@ -176,9 +187,9 @@ app.get('/oauth2callback', async function(req, res)
         profile: user.data
     };
 
-    console.log("Entering User into Database: " + user_id);
-
+    // console.log("Entering User into Database: " + user_id);
     req.session.user = user_data;
+
     res.redirect('/');
 
 });
@@ -187,8 +198,6 @@ app.get('/oauth2callback', async function(req, res)
 app.get('/logout', function(req, res)
 {
     // TODO: When logout: deauth app so they can choose another account
-
-    console.log("Accessed '/logout'");
     // req.logout();
     req.session.destroy(function(err)
     {
@@ -198,6 +207,12 @@ app.get('/logout', function(req, res)
     res.redirect('/');
 });
 
+app.get('/get/userdata', function(req, res)
+{
+    res.json(req.session.user);
+    res.end();
+});
+
 app.get('/get/drivedata', async function (req, res)
 {
     var files = null;
@@ -205,7 +220,6 @@ app.get('/get/drivedata', async function (req, res)
     var params = {};
     files = await drive.files.list(params);
 
-    
     res.json(files.data);
     res.end();
 });
@@ -215,8 +229,7 @@ app.get('/get/drivedata', async function (req, res)
 app.get('/', function(req, res)
 {
     
-    console.log("User Data from Session: " + JSON.stringify(req.session) + "\nID: " + req.session.id);
-
+    // console.log("User Data from Session: " + JSON.stringify(req.session) + "\nID: " + req.session.id);
     // If Logged in:
     if(req.session.user)
     {
@@ -229,11 +242,134 @@ app.get('/', function(req, res)
     
 });
 
+// TODO: Delete this horrible shit
+app.get('/new', async function(req, res)
+{
+    var folder = {}
+
+     // Search for MarkNote folder to see if has been created
+    var pageToken = null;
+
+    drive.files.list({
+        q: "name='MarkNote'", 
+        fields: 'nextPageToken, files(id, name)',
+        spaces: 'drive',
+        pageToken: pageToken
+    }, function(err, res_folders)
+    {
+        if(err)
+        {
+            console.log(err);
+            finish({"err": err});
+        }
+        else
+        {
+            folder.current = res_folders.data.files;
+            console.log("Step 1, Grabbed CURRENT Folders: " + JSON.stringify(folder));
+            // res.files.forEach(function(file)
+            // {
+            //     console.log("Found File: ", file.data.name, file.data.id);
+            // });
+            // pageToken = res.nextPageToken;
+
+            // finish(folder);
+
+
+            // If no folders, create one
+            if(!folder.current.files)
+            {
+                console.log("WE AINT FOUND SHIT, creating new folder");
+                var folderMetadata = 
+                {
+                    'name': 'MarkNote',
+                    'mimeType': 'application/vnd.google-apps.folder'
+                };
+
+                drive.files.create({
+                    resource: folderMetadata,
+                    fields: 'id'
+                }, function(err, file)
+                {
+                    if(err) {console.log(err);}
+                    else
+                    {
+                        folder.marknote.id = file.data.id;
+                        console.log("Created Folder: New Folder List: " + JSON.stringify(folder));
+                    }
+                });
+            }
+            else
+            {
+                folder.marknote.id = folder.current.files[0].id;
+                console.log("You have a folder already made.");
+            }
+
+            console.log(JSON.stringify(folder));
+
+            // Create new File to write to
+            var new_file_metadata =
+            {
+                'name': 'untitled.md',
+                parents: [folder.marknote.id]
+            }
+            var new_file = 
+            {
+                mimeType: 'text/markdown',
+                body: File_system.createReadStream('assets/drive/template.md')
+            };
+
+            drive.files.create({
+                resource: new_file_metadata,
+                media: new_file,
+                fields: 'id'
+            },
+            function(err, file)
+            {
+                if(err)
+                {
+                    console.log(err);
+                } 
+                else
+                {
+                    console.log("New File ID: " + file.marknote.id);
+                }
+            });
+
+
+            finish(folder);
+
+        }
+    });
+    
+
+    
+
+    function finish(data)
+    {
+        res.json(data);
+        res.end();
+    }
+
+});
+
+app.get('/picker', function(req, res)
+{
+    res.render('picker', {keys: keys});
+});
+
 // Endpoint: '/editor': used to access the editor. This will most likely change.
 app.get('/editor', function(req, res)
 {
+
     // res.render('editor', {login_url: global_web_uri + "/login"});
-    res.render('editor');
+    if(req.session.user)
+    {
+        res.render('editor', {user: req.session.user});
+    }
+    else
+    {
+        res.redirect('/');
+    }
 });
 
 // Error Page
