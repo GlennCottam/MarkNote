@@ -28,6 +28,7 @@ const cookieSession = require('cookie-session');
 // Setting Global Values
 const config = JSON.parse(File_system.readFileSync('config/global.json'));
 const port = config.server.port;
+const keys = require('../secure/keys');
 const client_secret = JSON.parse(File_system.readFileSync('secure/client_secret.json'));
 
 // GCloud scopes
@@ -79,6 +80,12 @@ console.log("\tImporting: Google API's");
 const {google} = require('googleapis');
 const {Datastore} = require('@google-cloud/datastore');
 const datastore = new Datastore();
+const oauth2Client = new google.auth.OAuth2(
+    keys.clientID,
+    keys.clientSecret,
+    keys.redirectURL,
+);
+
 
 /*
     Passport Framwork:
@@ -88,7 +95,6 @@ const datastore = new Datastore();
 console.log("\tImporting: Passport Authentication");
 const Passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
-const keys = require('../secure/keys');
 
 console.log("Import Complete.");
 
@@ -138,13 +144,17 @@ Passport.serializeUser((user, done) =>
 });
 
 // Deseralize User
-Passport.deserializeUser((id, done) =>
+Passport.deserializeUser(async function (id, done)
 {
     // Find on database
-    var userKey = datastore.key(['googleId', id])
-    var user = datastore.get(userKey);
+    var userKey = datastore.key(['googleId', id]);
+    var query = datastore.createQuery('googleId');
+    const [users] = await datastore.runQuery(query);
+    var user = users[0]; // !TODO: Fix this garbage (not safe).
+    // console.log("!!!!!!!DeserializeUser:\n\tUSER: " + JSON.stringify(user) + "\n\tID: " + id);
     done(null, user);
 });
+
 
 
 /*
@@ -163,12 +173,12 @@ app.use(cookieSession({
 app.use(Passport.initialize());
 app.use(Passport.session());
 
-
 /*
     The Server Itself:
         Below are the endpoints the server will listen too. These endpoints will
         do different things like login, editor etc...
 */
+
 // Endoint: '/login': The login endpoint will focus on logging the user in.
 app.get(
     '/login',
@@ -209,10 +219,14 @@ app.get('/get/logins', async function(req, res)
     res.end();
 });
 
-app.get('/get/drivedata', Passport.authenticate('google', {scope: scopes}), (req, res) =>
+app.get('/get/drivedata', function (req, res)
 {
+    // console.log("shite: " + JSON.stringify(req.user));
+    // const {tokens} = await oauth2Client.getToken()
+    oauth2Client.setCredentials(req.user.accessToken, req.user.refreshToken);
+
     const files = null;
-    const drive = google.drive({version: 'v3'});
+    const drive = google.drive({version: 'v3', oauth2Client});
     drive.files.list({
         pageSize: 10,
         fields: 'nextPageToken, files(id, name)'
