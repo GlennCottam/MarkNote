@@ -36,6 +36,7 @@ const File_system = require('fs');
 
 // Setting Global Values
 const config = JSON.parse(File_system.readFileSync('config/global.json'));
+const scrubber = require('./scrubber');
 const port = config.server.port;
 const keys = require('../secure/keys');
 // const client_secret = JSON.parse(File_system.readFileSync('secure/client_secret.json'));
@@ -127,6 +128,7 @@ app.use(Express.static('public'));                                              
 app.use(Cors());        
 app.enable('trust proxy');                                                        // Sets Cors Policy
 app.set('view engine', 'ejs');
+app.use(Express.urlencoded({extended: false}));
 app.use(session({
     secret: keys.session.cookieKey,
     name: 'MarkNote', 
@@ -358,14 +360,38 @@ app.get('/picker', function(req, res)
 });
 
 // Endpoint: '/editor': used to access the editor. This will most likely change.
-app.get('/editor', function(req, res)
+app.get('/editor', async function(req, res)
 {
 
     // TODO: Add some sort of query that opens up the ID of the file in the editor
     // res.render('editor', {login_url: global_web_uri + "/login"});
     if(req.session.user)
     {
-        res.render('editor', {user: req.session.user});
+        var fileId = req.query.fileId;
+        // var file = File_system.createReadStream('assets/drive/template.md');
+
+        var file = await drive.files.get({
+            fileId: fileId,
+            alt: 'media'
+        });
+
+        var raw_data = scrubber.scrub_string(file.data);
+        console.log("RAW DATA FROM FILE: " + raw_data);
+
+        var raw_markdown_data = scrubber.markdown_to_html(file.data);
+
+        // drive.files.get({
+        //     fileId: fileId,
+        //     alt: 'media'
+        // }).on('end', function()
+        // {
+        //     console.log("File Read Complete.");
+        // }).on('error', function(err)
+        // {
+        //     console.log('Error reading file: ' + err);
+        // }).pipe(file);
+
+        res.render('editor', {user: req.session.user, file: raw_markdown_data, fileId: fileId});
     }
     else
     {
@@ -384,9 +410,11 @@ app.get('/error', function(req, res)
 //  secure this endpoint though userauth so Joe doesn't use it in another API.
 app.post('/mdconvert', function(req, res)
 {
-    console.log("Post Request for MD > HTML:" + req.body);
+    console.log("Post Request for MD > HTML:" + JSON.stringify(req.body));
+    // var text = scrubber.scrub_string(req.body.text);
     var text = req.body.text;
-    var html = mdconverter.makeHtml(text);
+    var scrubbed_text = text.replace(/\\r\\n/g, "<br />");
+    var html = mdconverter.makeHtml(scrubbed_text);
     res.send(html);
 });
 

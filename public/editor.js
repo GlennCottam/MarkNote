@@ -19,14 +19,21 @@ const base_url = "http://localhost:8080/";
 // const base_url = "https://8080-cs-329088372048-default.us-east1.cloudshell.dev/"
 var index = 0;
 
-function convert_markdown()
+function convert_markdown(data)
 {
+    if(!data)
+    {
+        data = $('#editor').val();
+    }
+
+    console.log("DATA: " + data);
+
     var settings = {
         "url": base_url + "mdconvert/",
         "method": "POST",
         "timeout": 0,
         "data": {
-            "text": $('#editor').val()
+            "text": data
         }
     }
 
