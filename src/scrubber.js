@@ -11,7 +11,7 @@ var mdconverter = new showdown.Converter();
 global_methods.scrub_string = function(str)
 {
     result = str.replace(new RegExp('\r?\n','g'), '<br />');
-    console.log("SCRUBBER:\n\tBEFORE: " + str + "\n\tAFTER: " + result);
+    // console.log("SCRUBBER:\n\tBEFORE: " + str + "\n\tAFTER: " + result);
     return result
 
 };

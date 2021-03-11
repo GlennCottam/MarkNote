@@ -62,7 +62,6 @@ const global_web_uri = config.server.uri.local + ":" + port; // Comment Out When
 
 // Importing Body-Parser for HTTP requests
 console.log("\tImporting: Body-Parser");
-const BodyParser = require('body-parser');
 
 /* 
     ! Showdown Framework
@@ -374,23 +373,8 @@ app.get('/editor', async function(req, res)
             fileId: fileId,
             alt: 'media'
         });
-
         var raw_data = scrubber.scrub_string(file.data);
-        console.log("RAW DATA FROM FILE: " + raw_data);
-
         var raw_markdown_data = scrubber.markdown_to_html(file.data);
-
-        // drive.files.get({
-        //     fileId: fileId,
-        //     alt: 'media'
-        // }).on('end', function()
-        // {
-        //     console.log("File Read Complete.");
-        // }).on('error', function(err)
-        // {
-        //     console.log('Error reading file: ' + err);
-        // }).pipe(file);
-
         res.render('editor', {user: req.session.user, file: raw_markdown_data, fileId: fileId});
     }
     else

@@ -1,70 +1,58 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml">
-  <head>
-    <meta charset="utf-8" />
-    <title>MarkNote | File Picker</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<script type="text/javascript">
 
-    <script type="text/javascript">
+// The Browser API key obtained from the Google API Console.
+// Replace with your own Browser API key, or your own key.
+var developerKey = 'AIzaSyADlVRCc63M-zJ64t--JuJkkPhrQIf3eEA';
 
-    // The Browser API key obtained from the Google API Console.
-    // Replace with your own Browser API key, or your own key.
-    var developerKey = 'AIzaSyADlVRCc63M-zJ64t--JuJkkPhrQIf3eEA';
+// The Client ID obtained from the Google API Console. Replace with your own Client ID.
 
-    // The Client ID obtained from the Google API Console. Replace with your own Client ID.
+// Replace with your own project number from console.developers.google.com.
+// See "Project number" under "IAM & Admin" > "Settings"
+var appId = "marknote";
 
-    // Replace with your own project number from console.developers.google.com.
-    // See "Project number" under "IAM & Admin" > "Settings"
-    var appId = "marknote";
+// Scope to use to access user's Drive items.
+var scope = ['https://www.googleapis.com/auth/drive.file'];
 
-    // Scope to use to access user's Drive items.
-    var scope = ['https://www.googleapis.com/auth/drive.file'];
+var pickerApiLoaded = false;
+var oauthToken = "<%=user.tokens.tokens.access_token%>";
 
-    var pickerApiLoaded = false;
-    var oauthToken = "<%=user.tokens.tokens.access_token%>";
+// Use the Google API Loader script to load the google.picker script.
+function loadPicker() {
+//   gapi.load('auth', {'callback': onAuthApiLoad});
+gapi.load('picker', {'callback': onPickerApiLoad});
+}
 
-    // Use the Google API Loader script to load the google.picker script.
-    function loadPicker() {
-    //   gapi.load('auth', {'callback': onAuthApiLoad});
-      gapi.load('picker', {'callback': onPickerApiLoad});
-    }
+function onPickerApiLoad() {
+pickerApiLoaded = true;
+// createPicker();
+}
 
-    function onPickerApiLoad() {
-      pickerApiLoaded = true;
-      createPicker();
-    }
+// Create and render a Picker object for searching images.
+function createPicker() {
+if (pickerApiLoaded && oauthToken) {
+  var picker = new google.picker.PickerBuilder()
+      // .enableFeature(google.picker.Feature.NAV_HIDDEN)
+      // .enableFeature(google.picker.Feature.MULTISELECT_ENABLED)
+      .setAppId(appId)
+      .setOAuthToken(oauthToken)
+      .addView(new google.picker.DocsView().setIncludeFolders(true).setOwnedByMe(true).setMode(google.picker.DocsViewMode.LIST))
+      .addView(new google.picker.DocsUploadView().setIncludeFolders(true))
+      // .addView(new DocsView(ViewId.DOCUMENTS))
+      .setDeveloperKey(developerKey)
+      .setCallback(pickerCallback)
+      .build();
+    picker.setVisible(true);
+}
+}
 
-    // Create and render a Picker object for searching images.
-    function createPicker() {
-      if (pickerApiLoaded && oauthToken) {
-        var picker = new google.picker.PickerBuilder()
-            // .enableFeature(google.picker.Feature.NAV_HIDDEN)
-            // .enableFeature(google.picker.Feature.MULTISELECT_ENABLED)
-            .setAppId(appId)
-            .setOAuthToken(oauthToken)
-            .addView(new google.picker.DocsView().setIncludeFolders(true).setOwnedByMe(true).setMode(google.picker.DocsViewMode.LIST))
-            .addView(new google.picker.DocsUploadView().setIncludeFolders(true))
-            // .addView(new DocsView(ViewId.DOCUMENTS))
-            .setDeveloperKey(developerKey)
-            .setCallback(pickerCallback)
-            .build();
-         picker.setVisible(true);
-      }
-    }
+// A simple callback implementation.
+function pickerCallback(data) {
+if (data.action == google.picker.Action.PICKED) {
+  var fileId = data.docs[0].id;
+  window.location.replace('http://localhost:8080/editor?fileId=' + fileId);
+  // alert('The user selected: ' + fileId);
+}
+}
+</script>
+<script type="text/javascript" src="https://apis.google.com/js/api.js?onload=loadPicker"></script>
 
-    // A simple callback implementation.
-    function pickerCallback(data) {
-      if (data.action == google.picker.Action.PICKED) {
-        var fileId = data.docs[0].id;
-        window.location.replace('http://localhost:8080/editor?fileId=' + fileId);
-        // alert('The user selected: ' + fileId);
-      }
-    }
-    </script>
-  </head>
-  <body>
-    <div id="result"></div>
-    <!-- The Google API Loader script. -->
-    <script type="text/javascript" src="https://apis.google.com/js/api.js?onload=loadPicker"></script>
-  </body>
-</html>
