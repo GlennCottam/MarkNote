@@ -36,7 +36,7 @@ const File_system = require('fs');
 
 // Setting Global Values
 const config = JSON.parse(File_system.readFileSync('config/global.json'));
-const scrubber = require('./scrubber');
+const adjuster = require('./file_adjuster');
 const port = config.server.port;
 const keys = require('../secure/keys');
 // const client_secret = JSON.parse(File_system.readFileSync('secure/client_secret.json'));
@@ -76,6 +76,39 @@ showdown.setOption('tasklists', 'true');
 showdown.setOption('parseImgDimensions', 'true');
 showdown.setOption('allOn');
 var mdconverter = new showdown.Converter();
+
+// var mdconverter = new showdown.Converter({extensions: 'codehighlight'});
+
+// Build Custom Extension for Highlight.js
+// https://stackoverflow.com/questions/21785658/showdown-highlightjs-extension#34596672
+// showdown.extension('codehighlight', function() {
+//     function htmlunencode(text) {
+//       return (
+//         text
+//           .replace(/&amp;/g, '&')
+//           .replace(/&lt;/g, '<')
+//           .replace(/&gt;/g, '>')
+//         );
+//     }
+//     return [
+//       {
+//         type: 'output',
+//         filter: function (text, converter, options) {
+//           // use new shodown's regexp engine to conditionally parse codeblocks
+//           var left  = '<pre><code\\b[^>]*>',
+//               right = '</code></pre>',
+//               flags = 'g',
+//               replacement = function (wholeMatch, match, left, right) {
+//                 // unescape match to prevent double escaping
+//                 match = htmlunencode(match);
+//                 return left + hljs.highlightAuto(match).value + right;
+//               };
+//           return showdown.helper.replaceRecursiveRegExp(text, replacement, left, right, flags);
+//         }
+//       }
+//     ];
+// });
+
 
 /*
     HIghlight JS framework:
@@ -373,9 +406,17 @@ app.get('/editor', async function(req, res)
             fileId: fileId,
             alt: 'media'
         });
-        var raw_data = scrubber.scrub_string(file.data);
-        var raw_markdown_data = scrubber.markdown_to_html(file.data);
-        res.render('editor', {user: req.session.user, file: raw_markdown_data, fileId: fileId});
+
+        var converted_data = mdconverter.makeHtml(file.data);
+
+        // var converted_data = adjuster.all(file.data);
+        // console.log(converted_data);
+
+        // var raw_data = adjuster.scrub_string(file.data);
+        // var raw_markdown_data = adjuster.markdown_to_html(file.data);
+        // var raw_highlighted_data = adjuster.highlight(raw_markdown_data)
+        // console.log("Highlighted: " + raw_highlighted_data);
+        res.render('editor', {user: req.session.user, file: converted_data, fileId: fileId});
     }
     else
     {
@@ -389,13 +430,18 @@ app.get('/error', function(req, res)
     res.render('error');
 });
 
+app.on('error', function(req, res)
+{
+    res.redirect('/error');
+});
+
 
 // Endpoint: '/mdconvert': Used to convert markdown to HTML. I will need to 
 //  secure this endpoint though userauth so Joe doesn't use it in another API.
 app.post('/mdconvert', function(req, res)
 {
     console.log("Post Request for MD > HTML:" + JSON.stringify(req.body));
-    // var text = scrubber.scrub_string(req.body.text);
+    // var text = adjuster.scrub_string(req.body.text);
     var text = req.body.text;
     var scrubbed_text = text.replace(/\\r\\n/g, "<br />");
     var html = mdconverter.makeHtml(scrubbed_text);

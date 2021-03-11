@@ -1,5 +1,6 @@
 var global_methods = {}
 
+const highlighter = require('highlight.js');
 const showdown = require('showdown');
 showdown.setOption('ghCodeBlocks', 'true');
 showdown.setOption('tasklists', 'true');
@@ -22,10 +23,23 @@ global_methods.markdown_to_html = function(markdown)
 };
 
 
+global_methods.highlight = function(html)
+{
+    // return highlighter.highlightAuto(html);
+    return highlighter.highlightAll(html);
+};
 
 
-
-
+global_methods.all = function(str)
+{
+    var result1 = this.scrub_string(str);
+    console.log(result1);
+    result2 = this.markdown_to_html(result1);
+    console.log(result2);
+    result3 = this.highlight(result2);
+    console.log(result3);
+    return result3;
+};
 
 
 
