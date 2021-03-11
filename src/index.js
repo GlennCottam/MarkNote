@@ -71,43 +71,16 @@ console.log("\tImporting: Body-Parser");
 */
 console.log("\tImporting: Showdown");
 const showdown = require('showdown');
+console.log("\tImporting: Showdown-Highlight Extension");
+// https://github.com/Bloggify/showdown-highlight
+const showdownHighlight = require('showdown-highlight');
 showdown.setOption('ghCodeBlocks', 'true');
 showdown.setOption('tasklists', 'true');
 showdown.setOption('parseImgDimensions', 'true');
 showdown.setOption('allOn');
-var mdconverter = new showdown.Converter();
+// var mdconverter = new showdown.Converter();
 
-// var mdconverter = new showdown.Converter({extensions: 'codehighlight'});
-
-// Build Custom Extension for Highlight.js
-// https://stackoverflow.com/questions/21785658/showdown-highlightjs-extension#34596672
-// showdown.extension('codehighlight', function() {
-//     function htmlunencode(text) {
-//       return (
-//         text
-//           .replace(/&amp;/g, '&')
-//           .replace(/&lt;/g, '<')
-//           .replace(/&gt;/g, '>')
-//         );
-//     }
-//     return [
-//       {
-//         type: 'output',
-//         filter: function (text, converter, options) {
-//           // use new shodown's regexp engine to conditionally parse codeblocks
-//           var left  = '<pre><code\\b[^>]*>',
-//               right = '</code></pre>',
-//               flags = 'g',
-//               replacement = function (wholeMatch, match, left, right) {
-//                 // unescape match to prevent double escaping
-//                 match = htmlunencode(match);
-//                 return left + hljs.highlightAuto(match).value + right;
-//               };
-//           return showdown.helper.replaceRecursiveRegExp(text, replacement, left, right, flags);
-//         }
-//       }
-//     ];
-// });
+var mdconverter = new showdown.Converter({extensions: [showdownHighlight]});
 
 
 /*

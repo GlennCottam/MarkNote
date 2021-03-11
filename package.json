@@ -31,6 +31,7 @@
     "fs": "0.0.1-security",
     "googleapis": "^67.0.0",
     "highlight.js": "^10.6.0",
-    "showdown": "^1.9.1"
+    "showdown": "^1.9.1",
+    "showdown-highlight": "^2.1.6"
   }
 }
