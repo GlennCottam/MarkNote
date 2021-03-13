@@ -100,7 +100,7 @@ console.log("\tImporting: Google API's");
 const {google} = require('googleapis');
 const drive = google.drive('v3');
 const {Datastore} = require('@google-cloud/datastore');
-const datastore = new Datastore();
+const {DatastoreStore} = require('@google-cloud/connect-datastore');
 
 const oauth2Client = new google.auth.OAuth2(
     keys.google.clientID,
@@ -134,21 +134,29 @@ app.use(Cors());
 app.enable('trust proxy');                                                        // Sets Cors Policy
 app.set('view engine', 'ejs');
 app.use(Express.urlencoded({extended: false}));
+// Save sessions to Google Datastore
 app.use(session({
-    secret: keys.session.cookieKey,
-    name: 'MarkNote', 
-    resave: true, 
-    saveUninitialized: true,
-    cookie: 
-    {
-        secure: false,
-        path: '/',
-        sameSite: true
-    }
+    store: new DatastoreStore({
+        kind: 'express-sessions',
+        expirationMs: 0,
+        dataset: new Datastore({
+            projectId: process.env.GCLOUD_PROJECT,
+            keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS
+        })
+    }),
+    secret: 'my-secret',
+    resave: false,
+    saveUninitialized: false,
 }));
 
+// On every request, do this:
 app.use(function(req, res, next)
 {
+    // Check for session in database, and set tokens.
+    if(req.session.user)
+    {
+        oauth2Client.setCredentials(req.session.user.tokens.tokens);
+    }
     console.log("REQUEST: " + req.url);
     next();
 })
@@ -170,9 +178,9 @@ app.get('/login', function(req, res)
 app.get('/oauth2callback', async function(req, res)
 {
     // Grabs the Code from Google, turns it in for a token
-    // console.log("ENDPOINT: '/oauth2callback'");
     var code = req.query.code;
     var {tokens} = await oauth2Client.getToken(code);
+    console.log("New Tokens: \n" + JSON.stringify(tokens));
     oauth2Client.setCredentials(tokens);
 
     // Grabs user information, sets it in the express-session
@@ -194,7 +202,6 @@ app.get('/oauth2callback', async function(req, res)
         profile: user.data
     };
 
-    // console.log("Entering User into Database: " + user_id);
     req.session.user = user_data;
 
     res.redirect('/');
@@ -367,28 +374,15 @@ app.get('/picker', function(req, res)
 // Endpoint: '/editor': used to access the editor. This will most likely change.
 app.get('/editor', async function(req, res)
 {
-
-    // TODO: Add some sort of query that opens up the ID of the file in the editor
-    // res.render('editor', {login_url: global_web_uri + "/login"});
     if(req.session.user)
     {
         var fileId = req.query.fileId;
-        // var file = File_system.createReadStream('assets/drive/template.md');
-
         var file = await drive.files.get({
             fileId: fileId,
             alt: 'media'
         });
 
         var converted_data = mdconverter.makeHtml(file.data);
-
-        // var converted_data = adjuster.all(file.data);
-        // console.log(converted_data);
-
-        // var raw_data = adjuster.scrub_string(file.data);
-        // var raw_markdown_data = adjuster.markdown_to_html(file.data);
-        // var raw_highlighted_data = adjuster.highlight(raw_markdown_data)
-        // console.log("Highlighted: " + raw_highlighted_data);
         res.render('editor', {user: req.session.user, file: converted_data, fileId: fileId});
     }
     else
