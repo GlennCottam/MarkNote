@@ -55,9 +55,9 @@ As of right now, I will need to do some further research to define the categorie
 - [x] Configure Node.js Webserver
 - [x] Configure Google Cloud Platform
 - [ ] Create Functionality to save Markdown Files to Google Drive
-- [ ] Create Account Functions for Google
-- [ ] Create basic web pages (file management)
-- [ ] Test Account Functions
+- [x] Create Account Functions for Google
+- [x] Create basic web pages (file management)
+- [x] Test Account Functions
 - [ ] Create GUI for math and code functions
 - [ ] Implement Frameworks for Math and Code
 - [ ] Test Backend

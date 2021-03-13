@@ -42,15 +42,9 @@ const keys = require('../secure/keys');
 // const client_secret = JSON.parse(File_system.readFileSync('secure/client_secret.json'));
 
 // GCloud scopes
-// const scopes = [
-//     'https://www.googleapis.com/auth/userinfo.profile',     // User Profile, Needed for everything to work.
-//     'https://www.googleapis.com/auth/drive.appdata',        // Drive Appdata
-//     'https://www.googleapis.com/auth/drive.file'            // Drive files (save, read, modify etc...)
-// ];
-
 const scopes = [
     'https://www.googleapis.com/auth/userinfo.profile',     // User Profile, Needed for everything to work.
-    'https://www.googleapis.com/auth/drive',        // Drive data
+    'https://www.googleapis.com/auth/drive',                // ALL Drive data
 ];
 
 /* 
@@ -58,7 +52,6 @@ const scopes = [
 */
 const global_web_uri = config.server.uri.local + ":" + port; // Comment Out When In production
 // const global_web_uri = config.server.uri.production;      // Uncomment out when in production
-// console.log("Server URI: " + global_web_uri);                // Server confirmation on running the correct URI
 
 // Importing Body-Parser for HTTP requests
 console.log("\tImporting: Body-Parser");
