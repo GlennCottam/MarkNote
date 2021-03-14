@@ -48,26 +48,34 @@ function convert_markdown(data)
     index++;
 }
 
-function convert_hightlight()
+
+// Here how this thing gon work
+// 1. edit file
+// 2. store local value of file (will need to pass client non-converted markdown)
+//  2.1 find a way to grab fileline to edit. This will be difficult.
+// 3. send changed file to server
+// 4. on OK, send back converted HTML of new file.
+// 5. Pray it works.
+
+// https://github.com/sparksuite/simplemde-markdown-editor
+
+function update(action, fileId, data)
 {
     var settings = {
-        "url": base_url + "highlight/",
+        "url": base_url + "update",
         "method": "POST",
         "timeout": 0,
         "data": {
-            "text": $('#editor').val()
+            "action": action,
+            "fileId": fileId,
+            "data": data
         }
     }
 
-    $.ajax(settings).done(function (response) {
-        $('#editor').val('');
-        $('#viewer').append('<div class="d-flex flex-row"><div class="p-2 text-muted">' + index + '</div><div class="p-2">' + response + '</div></div>');
-        // $('#viewer').append(response);
+    $.ajax(settings).done(function(response)
+    {
         console.log(response);
-        // reloadCSS();
-    });
-
-    index++;
+    })
 }
 
 // Reload CSS

@@ -27,7 +27,9 @@
         <div class="container mt-4">
             <div>
                 <div class="col-sm" id="viewer">
-                    <%- file%>
+                    <% if(file) { %>
+                        <%- file%>
+                    <%}%>
                 </div>
                 <div class="input-group">
                     <textarea class="form-control" placeholder="Start Writing!" id="editor"></textarea>
@@ -35,31 +37,8 @@
                         <button class="btn btn-primary" type="button">Code</button>
                     </div>
                 </div>
-
-                <!-- <div class="form-floating">
-                    <textarea class="form-control" placeholder="Start Writing!" id="editor"></textarea>
-                    <label for="editor">New Line</label>
-                    <button class="form-control btn btn-primary">Code</button>
-                </div> -->
             </div>
         </div>
         <%- include('footer') %>
-
-        <script>
-            // var file = <%=JSON.stringify(file)%>;
-            // $(document).ready(function()
-            // {
-            //     console.log("Editor Ready");
-            //     convert_markdown("<%=file%>");
-            // });
-            // if(file)
-            // {
-                
-            // }
-            // else
-            // {
-            //     console.log("File Empty");
-            // }
-        </script>
     </body>
 </html>

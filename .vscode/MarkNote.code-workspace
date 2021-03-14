@@ -7,24 +7,18 @@
 	"settings": {
 		"files.autoSave": "off",
         "git.enabled": true,
-        "editor.fontSize": 12,
-	},
-	"launch": {
-		"version": "0.2.0",
-		"configurations": [
-			{
-				"type": "pwa-node",
-				"request": "launch",
-				"name": "Launch Program",
-				"skipFiles": [
-					"<node_internals>/**"
-				],
-				"program": "/home/devel/Repos/MarkNote/views/index.ejs",
-				"__workspaceFolder": "/home/devel/Repos/MarkNote/views",
-				"outFiles": [
-					"${workspaceFolder}/**/*.js"
-				]
-			}
-		]
+		"editor.fontSize": 12,
+		"cSpell.words": [
+			"API's",
+			"GCLOUD",
+			"gapi",
+			"googleid",
+			"mdconvert",
+			"mdconverter"
+		],
+		// "editor.rulers": [
+    
+		// 	120,
+		// ],
 	}
 }

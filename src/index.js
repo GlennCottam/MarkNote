@@ -78,7 +78,7 @@ var mdconverter = new showdown.Converter({extensions: [showdownHighlight]});
 
 /*
     HIghlight JS framework:
-        This framework highlights sepcific code snippts with
+        This framework highlights specific code snippts with
         various themes and color schemes.
 */
 const h1js = require('highlight.js');
@@ -148,6 +148,7 @@ app.use(function(req, res, next)
     // Check for session in database, and set tokens.
     if(req.session.user)
     {
+        console.log("Setting User Tokens");
         oauth2Client.setCredentials(req.session.user.tokens.tokens);
     }
     console.log("REQUEST: " + req.url);
@@ -160,7 +161,7 @@ app.use(function(req, res, next)
         do different things like login, editor etc...
 */
 
-// Endoint: '/login': The login endpoint will focus on logging the user in.
+// Endpoint: '/login': The login endpoint will focus on logging the user in.
 app.get('/login', function(req, res)
 {
     // console.log("ENDPOINT: '/login'");
@@ -204,7 +205,7 @@ app.get('/oauth2callback', async function(req, res)
 // Endpoint: '/logout': Allows the user to logout of their account.
 app.get('/logout', function(req, res)
 {
-    // TODO: When logout: deauth app so they can choose another account
+    // TODO: When logout: de-auth app so they can choose another account
     // req.logout();
     req.session.destroy(function(err)
     {
@@ -285,7 +286,7 @@ app.get('/new', async function(req, res)
             // If no folders, create one
             if(!folder.current.files)
             {
-                console.log("WE AINT FOUND SHIT, creating new folder");
+                console.log("WE AIN'T FOUND SHIT, creating new folder");
                 var folderMetadata = 
                 {
                     'name': 'MarkNote',
@@ -376,7 +377,7 @@ app.get('/editor', async function(req, res)
         });
 
         var converted_data = mdconverter.makeHtml(file.data);
-        res.render('editor', {user: req.session.user, file: converted_data, fileId: fileId});
+        res.render('editor', {user: req.session.user, file: converted_data, raw: file.data, fileId: fileId});
     }
     else
     {
@@ -395,6 +396,16 @@ app.on('error', function(req, res)
     res.redirect('/error');
 });
 
+app.post('/update', function(req, res)
+{
+    console.log("Action: " + req.body.action + "\nData: " + req.body.data + "\nFileID: " + req.body.fileId);
+
+
+
+
+    res.send("Updated");
+    res.end();
+});
 
 // Endpoint: '/mdconvert': Used to convert markdown to HTML. I will need to 
 //  secure this endpoint though userauth so Joe doesn't use it in another API.
@@ -412,7 +423,7 @@ app.post('/mdconvert', function(req, res)
 //      code.
 app.post('/highlight', function(req, res)
 {
-    console.log("Post Requst for HTML > Highlight" + req.body);
+    console.log("Post Request for HTML > Highlight" + req.body);
     var code = req.body.text;
     var html = h1js.highlightAuto(code).value;
     res.send(html);
