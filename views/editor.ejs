@@ -72,6 +72,7 @@
 
                 // Start spinner
                 $("#save_spinner").attr('hidden', false);
+                $("#save_button").attr('disabled', true);
                 // Save the File
                 await $.ajax(settings).done(function(response)
                 {
@@ -79,18 +80,22 @@
                 });
                 // Stop Spinner
                 $("#save_spinner").attr('hidden', true);
+                $("#save_button").attr('disabled', false);
             }
         </script>
 
     </head>
-    <body class="bg-dark text-light">
+    <body class="">
         <%- include('header') %>
-        <div class="container-fluid bg-light pb-2">
+        <div class="container-fluid p-0 pt-2">
             <textarea id="editor" class="w-100"><%if(raw){%><%-raw.data%><%}%></textarea>
-            <button class="btn btn-primary" type="button" onclick="save();">
-                <span id="save_spinner" class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true" hidden></span>
-                Save
-              </button>
+            <div class="p-2">
+                <button id="save_button" class="btn btn-primary" type="button" onclick="save();">
+                    <span id="save_spinner" class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true" hidden></span>
+                    Save
+                </button>
+            </div>
+            
         </div>
         <%- include('footer') %>
     </body>

@@ -1,6 +1,7 @@
 <style>
     .picker
     {
+        margin-top: 12px;
         height: 95% !important;
         width: 95% !important;
         top: 0 !important;
@@ -37,31 +38,81 @@ pickerApiLoaded = true;
 }
 
 // Create and render a Picker object for searching images.
-function createPicker() {
-if (pickerApiLoaded && oauthToken) {
-  var picker = new google.picker.PickerBuilder()
-      // .enableFeature(google.picker.Feature.NAV_HIDDEN)
-      // .enableFeature(google.picker.Feature.MULTISELECT_ENABLED)
-      .setAppId(appId)
-      .setOAuthToken(oauthToken)
-      .addView(new google.picker.DocsView().setIncludeFolders(true).setOwnedByMe(true).setMode(google.picker.DocsViewMode.LIST))
-      .addView(new google.picker.DocsUploadView().setIncludeFolders(true))
-      // .addView(new DocsView(ViewId.DOCUMENTS))
-      .setDeveloperKey(developerKey)
-      .setCallback(pickerCallback)
-      .build();
-    picker.setVisible(true);
+function createPicker() 
+{
+    var markdown_view = new google.picker
+                            .View(google.picker.ViewId.DOCS, google.picker.DocsViewMode.LIST)
+                            .setMimeTypes('text/markdown');
+
+    var all_files_view = new google.picker
+                            .DocsView()
+                            .setIncludeFolders(true)
+                            .setOwnedByMe(true)
+                            .setMode(google.picker.DocsViewMode.LIST);
+
+    if (pickerApiLoaded && oauthToken)
+    {
+        var picker = new google.picker.PickerBuilder()
+        .setSelectableMimeTypes('text/markdown')
+        
+        .setAppId(appId)
+        .setOAuthToken(oauthToken)
+        .setTitle("Select A File")
+        .addView(markdown_view)
+        .addView(all_files_view)
+        // .addView(new google.picker.DocsUploadView().setIncludeFolders(true))
+        
+        // .addView(new DocsView(ViewId.DOCUMENTS))
+        .setDeveloperKey(developerKey)
+        .setCallback(pickerCallback)
+        .build();
+
+        picker.setVisible(true);
+    }
 }
+
+function createNewFilePicker()
+{
+    var folder_view = new google.picker
+                            // .View(google.picker.ViewId.FOLDERS, google.picker.DocsViewMode.LIST);
+                            .DocsView()
+                            .setIncludeFolders(true)
+                            .setSelectFolderEnabled(true);
+
+    if (pickerApiLoaded && oauthToken)
+    {
+        var picker = new google.picker.PickerBuilder()
+        // .setSelectableMimeTypes('application/vnd.google-apps.folder')
+        .enableFeature(google.picker.Feature.MINE_ONLY)
+        .enableFeature(google.picker.Feature.NAV_HIDDEN)
+        .setAppId(appId)
+        .setOAuthToken(oauthToken)
+        .setTitle("Select A Folder")
+        .addView(folder_view)
+        .setDeveloperKey(developerKey)
+        .setCallback(newFilePickerCallback)
+        .build();
+
+        picker.setVisible(true);
+    }
 }
 
 // A simple callback implementation.
-function pickerCallback(data) {
-if (data.action == google.picker.Action.PICKED) {
-  var fileId = data.docs[0].id;
-  window.location.replace('http://localhost:8080/editor?fileId=' + fileId);
-  // alert('The user selected: ' + fileId);
+function pickerCallback(data) 
+{
+    if (data.action == google.picker.Action.PICKED) {
+        var fileId = data.docs[0].id;
+        window.location.replace('http://localhost:8080/editor?fileId=' + fileId);
+        // alert('The user selected: ' + fileId);
+    }
 }
+
+function newFilePickerCallback(data)
+{
+    console.log("You Reached the new file picker callback" + JSON.stringify(data));
+    window.location.replace('http://localhost:8080/new?folderId=' + data.docs[0].id);
 }
+
 </script>
 <script type="text/javascript" src="https://apis.google.com/js/api.js?onload=loadPicker"></script>
 

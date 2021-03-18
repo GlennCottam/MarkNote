@@ -2,37 +2,38 @@
     <% if(user) {%>
         <%- include('picker') %>
     <%}%>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <nav class="navbar navbar-expand-md navbar-dark bg-primary rounded-bottom">
         <div class="container-fluid">
-            <a href="/" class="navbar-brand">MarkNote</a>
+            <a href="/" class="navbar-brand"><i class="fas fa-home"></i>&nbsp;MarkNote</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle Navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse justify-content-end" id="navbarSupportedContent">
                 <ul class="navbar-nav mb-2 mb-lg-0">
-                    <li class="nav-item">
-                        <button class="btn btn-dark" onclick="window.open('https://github.com/GlennCottam/MarkNote', 'blank')"><i class="fab fa-github"></i>&nbsp;View On Github</button>
+                    <li class="nav-item m-1">
+                        <button class="btn btn-dark w-100" onclick="window.open('https://github.com/GlennCottam/MarkNote', 'blank')"><i class="fab fa-github"></i>&nbsp;View On Github</button>
                     </li>
                     
                     <% if(user) {%>
-                        <li class="nav-item">
-                            <button class="btn bg-success text-white" onclick="createPicker()"><i class="fas fa-folder-open"></i>&nbsp;Open File</button>
+                        <li class="nav-item m-1">
+                            <button class="btn bg-success text-white w-100" onclick="createPicker()"><i class="fas fa-folder-open"></i>&nbsp;Open File</button>
                         </li>
-                        <li class="nav-item">
-                            <button class="btn bg-success text-white" onclick="window.open('/editor', '_parent')"><i class="fas fa-edit"></i>&nbsp;Editor</button>
+                        <li class="nav-item m-1">
+                            <button class="btn bg-success text-white w-100" onclick="createNewFilePicker()"><i class="fas fa-edit""></i>&nbsp;New File</button>
+                            <!-- <button class="btn bg-success text-white w-100" onclick="window.open('/new', '_parent')"><i class="fas fa-edit"></i>&nbsp;New File</button> -->
                         </li>
-                        <li class="nav-item dropdown">
-                            <button class="btn text-white bg-dark dropdown-toggle" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <li class="nav-item m-1 dropdown">
+                            <button class="btn text-white w-100 bg-dark dropdown-toggle" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <img class="rounded-pill" height="22px" alt="Profile_Picture" src="<%= user.profile.photos[0].url%>">&nbsp;<%= user.profile.names[0].displayName%>
                             </button>
-                            <ul class="dropdown-menu bg-dark" aria-labelledby="navbarDropdown">
+                            <ul class="dropdown-menu w-100 bg-dark p-0" aria-labelledby="navbarDropdown">
                                 <li><a href="/logout" class="dropdown-item text-light bg-danger"><i class="fas fa-sign-out-alt"></i>&nbsp;Logout</a></li>
                             </ul>
                         </li>
     
                     <% } else { %>
-                        <li class="nav-item">
-                            <button class="btn bg-success text-white" onclick="window.open('/login', '_parent')"><i class="fas fa-sign-in-alt"></i>&nbsp;Login</button>
+                        <li class="nav-item m-1">
+                            <button class="w-100 btn bg-success text-white" onclick="window.open('/login', '_parent')"><i class="fas fa-sign-in-alt"></i>&nbsp;Login</button>
                         </li>
                     <% }%>
                 </ul>

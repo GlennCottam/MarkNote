@@ -237,116 +237,49 @@ app.get('/', function(req, res)
 // TODO: Delete this horrible shit
 app.get('/new', async function(req, res)
 {
-    var folder = {}
+    // Once Folder has been selected, Give it the name Untitled, and create to drive.
+    // Once created, redirect to editor with file id.
+    // TODO: Implement a way to change filename.
 
-     // Search for MarkNote folder to see if has been created
-    var pageToken = null;
+    var folderId = req.query.folderId;
 
-    drive.files.list({
-        q: "name='MarkNote'", 
-        fields: 'nextPageToken, files(id, name)',
-        spaces: 'drive',
-        pageToken: pageToken
-    }, function(err, res_folders)
+    console.log(folderId);
+
+    var fileMetadata = 
+    {
+        'name': 'Untitled.md',
+        parents: [folderId]
+    };
+
+    var media = 
+    {
+        mimeType: 'text/markdown',
+    }
+
+    await drive.files.create({
+        resource: fileMetadata,
+        media: media,
+    }, function(err, res)
     {
         if(err)
         {
-            console.log(err);
-            finish({"err": err});
+            console.log(err); 
+            finish({err: err});
         }
         else
         {
-            folder.current = res_folders.data.files;
-            console.log("Step 1, Grabbed CURRENT Folders: " + JSON.stringify(folder));
-            // res.files.forEach(function(file)
-            // {
-            //     console.log("Found File: ", file.data.name, file.data.id);
-            // });
-            // pageToken = res.nextPageToken;
-
-            // finish(folder);
-
-
-            // If no folders, create one
-            if(!folder.current.files)
-            {
-                console.log("WE AIN'T FOUND SHIT, creating new folder");
-                var folderMetadata = 
-                {
-                    'name': 'MarkNote',
-                    'mimeType': 'application/vnd.google-apps.folder'
-                };
-
-                drive.files.create({
-                    resource: folderMetadata,
-                    fields: 'id'
-                }, function(err, file)
-                {
-                    if(err) {console.log(err);}
-                    else
-                    {
-                        folder.marknote.id = file.data.id;
-                        console.log("Created Folder: New Folder List: " + JSON.stringify(folder));
-                    }
-                });
-            }
-            else
-            {
-                folder.marknote.id = folder.current.files[0].id;
-                console.log("You have a folder already made.");
-            }
-
-            console.log(JSON.stringify(folder));
-
-            // Create new File to write to
-            var new_file_metadata =
-            {
-                'name': 'untitled.md',
-                parents: [folder.marknote.id]
-            }
-            var new_file = 
-            {
-                mimeType: 'text/markdown',
-                body: File_system.createReadStream('assets/drive/template.md')
-            };
-
-            drive.files.create({
-                resource: new_file_metadata,
-                media: new_file,
-                fields: 'id'
-            },
-            function(err, file)
-            {
-                if(err)
-                {
-                    console.log(err);
-                } 
-                else
-                {
-                    console.log("New File ID: " + file.marknote.id);
-                }
-            });
-
-
-            finish(folder);
+            console.log("FILE DATA: " + JSON.stringify(res));
+            finish(res.data.id);
 
         }
-    });
-    
 
-    
+    })
 
     function finish(data)
     {
-        res.json(data);
-        res.end();
+        res.redirect('/editor?fileId=' + data);
     }
 
-});
-
-app.get('/picker', function(req, res)
-{
-    res.render('picker', {user: req.session.user});
 });
 
 // Endpoint: '/editor': used to access the editor. This will most likely change.
@@ -376,11 +309,6 @@ app.post('/save', async function(req, res)
 {
     console.log("\nFileID: " + req.body.fileId + "Data: " + req.body.data);
 
-    var response =
-    {
-        saved: true,
-    }
-
     var file = await drive.files.update({
         fileId: req.body.fileId,
         media: 
@@ -390,12 +318,22 @@ app.post('/save', async function(req, res)
         },
     }, (err, res) =>
     {
-        if(err) {response.saved = false; response.error = err}
-        response.data = res.data;
+        if(err) {
+            finish({saved: false, err: err})
+        }
+        else
+        {
+            finish({saved: true, data: res.data});
+        }
     });
 
-    res.json(response);
-    res.end();
+    function finish(data)
+    {
+        res.json(data);
+        res.end();
+    }
+
+    
 });
 
 // Error Page
