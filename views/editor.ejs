@@ -25,6 +25,15 @@
         <!-- Title -->
         <title>MarkNote | Editor</title>
 
+        <style>
+            #save_button
+            {
+                z-index: 1000;
+                position: fixed;
+                bottom: 32px;
+                right: 12px;
+            }
+        </style>
         <script>
             const base_url = "http://localhost:8080/";
             var simplemde;
@@ -57,8 +66,23 @@
             });
 
             // Function to save File to GDrive
+            // Also changes the name of the file too.
             async function save(id)
             {
+                var filename = null;
+                var id_FileName = $("#FileName")
+                if(id_FileName.val())
+                {
+                    // Replace with new filename
+                    filename = id_FileName.val();
+                }
+                else
+                {
+                    filename = id_FileName.attr('placeholder');
+                }
+
+                console.log("Filename: " + filename);
+
                 // Setup for Ajax
                 var settings = {
                     "url": base_url + "save",
@@ -66,6 +90,7 @@
                     "timeout": 0,
                     "data": {
                         "fileId": "<%-fileId%>",
+                        "fileName": filename,
                         "data": simplemde.value()
                     }
                 }
@@ -81,18 +106,25 @@
                 // Stop Spinner
                 $("#save_spinner").attr('hidden', true);
                 $("#save_button").attr('disabled', false);
+                $("#FileName").attr('placeholder', filename);
+                $("#FileName").val('');
             }
+
         </script>
 
     </head>
     <body class="">
         <%- include('header') %>
         <div class="container-fluid p-0 pt-2">
+            <div class="input-group mb-3">
+                <input id="FileName" type="text" class="form-control" placeholder="<%=filemetadata.data.name%>">
+                <button onclick="save();" class="btn btn-primary" type="button">Rename</button>
+            </div>
             <textarea id="editor" class="w-100"><%if(raw){%><%-raw.data%><%}%></textarea>
-            <div class="p-2">
+            <div id="save_button">
                 <button id="save_button" class="btn btn-primary" type="button" onclick="save();">
-                    <span id="save_spinner" class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true" hidden></span>
-                    Save
+                    <i class="fab fa-google-drive"></i> &nbsp; Save
+                    <span id="save_spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" hidden></span>
                 </button>
             </div>
             

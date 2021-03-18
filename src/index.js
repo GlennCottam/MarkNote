@@ -293,9 +293,14 @@ app.get('/editor', async function(req, res)
             alt: 'media'
         });
 
-        var converted_data = mdconverter.makeHtml(file.data);
+        var metadata = await drive.files.get({
+            fileId: fileId,
+        });
+
         // console.log("FILE DATA: " + JSON.stringify(file));
-        res.render('editor', {user: req.session.user, file: converted_data, raw: file, fileId: fileId});
+        // console.log("Filename: " + file_name.data.name);
+
+        res.render('editor', {user: req.session.user, raw: file, fileId: fileId, filemetadata: metadata});
     }
     else
     {
@@ -307,10 +312,15 @@ app.get('/editor', async function(req, res)
 
 app.post('/save', async function(req, res)
 {
-    console.log("\nFileID: " + req.body.fileId + "Data: " + req.body.data);
+    // console.log("\nFileID: " + req.body.fileId + "Data: " + req.body.data);
 
+    console.log("FILEDATA: \tFILENAME: " + req.body.fileName);
     var file = await drive.files.update({
         fileId: req.body.fileId,
+        resource:
+        {
+            'name': req.body.fileName
+        },
         media: 
         {
             mimeType: 'text/markdown',

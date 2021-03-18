@@ -33,8 +33,7 @@ gapi.load('picker', {'callback': onPickerApiLoad});
 }
 
 function onPickerApiLoad() {
-pickerApiLoaded = true;
-// createPicker();
+    pickerApiLoaded = true;
 }
 
 // Create and render a Picker object for searching images.
@@ -82,7 +81,6 @@ function createNewFilePicker()
     if (pickerApiLoaded && oauthToken)
     {
         var picker = new google.picker.PickerBuilder()
-        // .setSelectableMimeTypes('application/vnd.google-apps.folder')
         .enableFeature(google.picker.Feature.MINE_ONLY)
         .enableFeature(google.picker.Feature.NAV_HIDDEN)
         .setAppId(appId)
