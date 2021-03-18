@@ -94,6 +94,7 @@ const {google} = require('googleapis');
 const drive = google.drive('v3');
 const {Datastore} = require('@google-cloud/datastore');
 const {DatastoreStore} = require('@google-cloud/connect-datastore');
+const { Stream } = require('stream');
 
 const oauth2Client = new google.auth.OAuth2(
     keys.google.clientID,
@@ -107,6 +108,26 @@ const global_auth_url = oauth2Client.generateAuthUrl({
 });
 
 google.options({auth: oauth2Client});
+
+
+
+/*
+    SimpleMDE: Framework for Markdown Editing
+    https://github.com/sparksuite/simplemde-markdown-editor
+        Framework to basically do all the markdown editing for me.
+*/
+// console.log("\tImporting: SimpleMDE");
+// const SimpleMDE = require('simplemde');
+// var simplemde = new SimpleMDE({
+//     autofocus: true,
+//     autosave:
+//     {
+//         enabled: true,
+//         uniqueId: "idk something",
+//         delay: 1000,
+//     }
+// });
+
 
 console.log("Import Complete.");
 
@@ -377,12 +398,41 @@ app.get('/editor', async function(req, res)
         });
 
         var converted_data = mdconverter.makeHtml(file.data);
-        res.render('editor', {user: req.session.user, file: converted_data, raw: file.data, fileId: fileId});
+        // console.log("FILE DATA: " + JSON.stringify(file));
+        res.render('editor', {user: req.session.user, file: converted_data, raw: file, fileId: fileId});
     }
     else
     {
         res.redirect('/');
     }
+});
+
+
+
+app.post('/save', async function(req, res)
+{
+    console.log("\nFileID: " + req.body.fileId + "Data: " + req.body.data);
+
+    var response =
+    {
+        saved: true,
+    }
+
+    var file = await drive.files.update({
+        fileId: req.body.fileId,
+        media: 
+        {
+            mimeType: 'text/markdown',
+            body: req.body.data
+        },
+    }, (err, res) =>
+    {
+        if(err) {response.saved = false; response.error = err}
+        response.data = res.data;
+    });    
+
+    res.json(response);
+    res.end();
 });
 
 // Error Page
@@ -394,39 +444,6 @@ app.get('/error', function(req, res)
 app.on('error', function(req, res)
 {
     res.redirect('/error');
-});
-
-app.post('/update', function(req, res)
-{
-    console.log("Action: " + req.body.action + "\nData: " + req.body.data + "\nFileID: " + req.body.fileId);
-
-
-
-
-    res.send("Updated");
-    res.end();
-});
-
-// Endpoint: '/mdconvert': Used to convert markdown to HTML. I will need to 
-//  secure this endpoint though userauth so Joe doesn't use it in another API.
-app.post('/mdconvert', function(req, res)
-{
-    console.log("Post Request for MD > HTML:" + JSON.stringify(req.body));
-    // var text = adjuster.scrub_string(req.body.text);
-    var text = req.body.text;
-    var scrubbed_text = text.replace(/\\r\\n/g, "<br />");
-    var html = mdconverter.makeHtml(scrubbed_text);
-    res.send(html);
-});
-
-// Endpoint: '/highlight': Used similar to /mdconvert but with highlighting of
-//      code.
-app.post('/highlight', function(req, res)
-{
-    console.log("Post Request for HTML > Highlight" + req.body);
-    var code = req.body.text;
-    var html = h1js.highlightAuto(code).value;
-    res.send(html);
 });
 
 // Web server startup.

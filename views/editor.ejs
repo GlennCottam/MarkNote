@@ -16,28 +16,76 @@
         <!-- <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/default.min.css"> -->
         <!-- <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script> -->
         <!-- Showndown JS -->
-        <script src="/showdownjs-showdown-3c120ed/src/showdown.js"></script>
-        <!-- Highlight / Showdown JS Script -->
+        <!-- <script src="/showdownjs-showdown-3c120ed/src/showdown.js"></script> -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
+        <script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
+       
+        <!-- All functions related to the editor -->
         <script src="editor.js"></script>
         <!-- Title -->
         <title>MarkNote | Editor</title>
+
+        <script>
+            const base_url = "http://localhost:8080/";
+            var simplemde;
+
+            // https://stackoverflow.com/questions/93695/best-cross-browser-method-to-capture-ctrls-with-jquery#14180949
+            $(window).keypress(function(event) {
+                if (!(event.which == 115 && event.ctrlKey) && !(event.which == 19)) return true;
+                alert("Ctrl-S pressed");
+                event.preventDefault();
+                return false;
+            });
+
+            $(document).ready(function()
+{
+                console.log("ready");
+                
+                simplemde = new SimpleMDE({
+                    // autosave: {
+                    //     enabled: true,
+                    //     uniqueId: "<%-fileId%>",
+                    //     delay: 1000,
+                    // },
+                    element: $("#editor")[0],
+                    renderingConfig: {
+                        singleLineBreaks: false,
+                        codeSyntaxHighlighting: true,
+                    },
+                });
+            });
+
+
+            async function save(id)
+            {
+                // console.log("Sending data: " + simplemde.value());
+                var settings = {
+                    "url": base_url + "save",
+                    "method": "POST",
+                    "timeout": 0,
+                    "data": {
+                        "fileId": "<%-fileId%>",
+                        "data": simplemde.value()
+                    }
+                }
+                $("#save_spinner").attr('hidden', false);
+                await $.ajax(settings).done(function(response)
+                {
+                    console.log(response);
+                })
+                $("#save_spinner").attr('hidden', true);
+            }
+        </script>
+
     </head>
     <body class="bg-dark text-light">
         <%- include('header') %>
-        <div class="container mt-4">
-            <div>
-                <div class="col-sm" id="viewer">
-                    <% if(file) { %>
-                        <%- file%>
-                    <%}%>
-                </div>
-                <div class="input-group">
-                    <textarea class="form-control" placeholder="Start Writing!" id="editor"></textarea>
-                    <div class="input-group-append">
-                        <button class="btn btn-primary" type="button">Code</button>
-                    </div>
-                </div>
-            </div>
+        <div class="container-fluid bg-light pb-2">
+            <textarea id="editor" class="w-100"><%if(raw){%><%-raw.data%><%}%></textarea>
+            <button class="btn btn-primary" type="button" onclick="save();">
+                <span id="save_spinner" class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true" hidden></span>
+                Save
+              </button>
         </div>
         <%- include('footer') %>
     </body>
