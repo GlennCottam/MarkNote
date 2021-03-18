@@ -109,26 +109,6 @@ const global_auth_url = oauth2Client.generateAuthUrl({
 
 google.options({auth: oauth2Client});
 
-
-
-/*
-    SimpleMDE: Framework for Markdown Editing
-    https://github.com/sparksuite/simplemde-markdown-editor
-        Framework to basically do all the markdown editing for me.
-*/
-// console.log("\tImporting: SimpleMDE");
-// const SimpleMDE = require('simplemde');
-// var simplemde = new SimpleMDE({
-//     autofocus: true,
-//     autosave:
-//     {
-//         enabled: true,
-//         uniqueId: "idk something",
-//         delay: 1000,
-//     }
-// });
-
-
 console.log("Import Complete.");
 
 /*
@@ -234,23 +214,6 @@ app.get('/logout', function(req, res)
     });
     // res.send(req.user);
     res.redirect('/');
-});
-
-app.get('/get/userdata', function(req, res)
-{
-    res.json(req.session.user);
-    res.end();
-});
-
-app.get('/get/drivedata', async function (req, res)
-{
-    var files = null;
-    google.options({auth: oauth2Client});
-    var params = {};
-    files = await drive.files.list(params);
-
-    res.json(files.data);
-    res.end();
 });
 
 
@@ -429,7 +392,7 @@ app.post('/save', async function(req, res)
     {
         if(err) {response.saved = false; response.error = err}
         response.data = res.data;
-    });    
+    });
 
     res.json(response);
     res.end();

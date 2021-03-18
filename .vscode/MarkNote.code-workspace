@@ -14,7 +14,8 @@
 			"gapi",
 			"googleid",
 			"mdconvert",
-			"mdconverter"
+			"mdconverter",
+			"simplemde"
 		],
 		// "editor.rulers": [
     
