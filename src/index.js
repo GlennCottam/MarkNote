@@ -39,7 +39,6 @@ const config = JSON.parse(File_system.readFileSync('config/global.json'));
 const adjuster = require('./file_adjuster');
 const port = config.server.port;
 const keys = require('../secure/keys');
-// const client_secret = JSON.parse(File_system.readFileSync('secure/client_secret.json'));
 
 // GCloud scopes
 const scopes = [
@@ -50,8 +49,8 @@ const scopes = [
 /* 
     Global URL set for Testing on Localhost, or set to URL for application. 
 */
-const global_web_uri = config.server.uri.local + ":" + port; // Comment Out When In production
-// const global_web_uri = config.server.uri.production;      // Uncomment out when in production
+// const global_web_uri = config.server.uri.local + ":" + port; // Comment Out When In production
+const global_web_uri = config.server.uri.production;      // Uncomment out when in production
 
 // Importing Body-Parser for HTTP requests
 console.log("\tImporting: Body-Parser");
