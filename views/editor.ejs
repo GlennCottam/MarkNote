@@ -10,15 +10,13 @@
         <!-- Bootstrap -->
         <script src="bootstrap-5.0.0-beta1-dist/js/bootstrap.min.js"></script>
         <link rel="stylesheet" href="bootstrap-5.0.0-beta1-dist/css/bootstrap.min.css">
+        
         <!-- FontAwesome -->
         <script src="https://kit.fontawesome.com/c0fad50d4f.js" crossorigin="anonymous"></script>
         <!-- Highlight JS -->
         <script src="/highlight/highlight.pack.js"></script>
         <link rel="stylesheet" href="/highlight/tomorrow-night.css">
-        <!-- <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/default.min.css"> -->
-        <!-- <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script> -->
-        <!-- Showndown JS -->
-        <!-- <script src="/showdownjs-showdown-3c120ed/src/showdown.js"></script> -->
+
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
         <script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
         
@@ -38,13 +36,39 @@
             const base_url = "http://localhost:8080/";
             var simplemde;
 
-            // TODO: Keypress handler (Not working btw)
+            // Keypress Methods!
             // https://stackoverflow.com/questions/93695/best-cross-browser-method-to-capture-ctrls-with-jquery#14180949
-            $(window).keypress(function(event) {
-                if (!(event.which == 115 && event.ctrlKey) && !(event.which == 19)) return true;
-                alert("Ctrl-S pressed");
-                event.preventDefault();
-                return false;
+            $(window).bind('keydown', function(event) {
+                if (event.ctrlKey || event.metaKey) {
+                    switch (String.fromCharCode(event.which).toLowerCase()) {
+                    case 's':
+                        event.preventDefault();
+                        save();
+                        break;
+                    case 'f':
+                        event.preventDefault();
+                        break;
+                    case 'o':
+                        event.preventDefault();
+                        createPicker();
+                        break;
+                    case 'g':
+                        event.preventDefault();
+                        break;
+                    }
+                }
+                if(event.altKey && String.fromCharCode(event.which).toLowerCase() == 'n')
+                {
+                    createNewFilePicker();
+                }
+                if(event.altKey && String.fromCharCode(event.which).toLowerCase() == 's')
+                {
+                    save();
+                }
+                if(event.altKey && String.fromCharCode(event.which).toLowerCase() == 'o')
+                {
+                    createPicker();
+                }
             });
 
             $(document).ready(function()
@@ -52,11 +76,11 @@
                 console.log("ready");
                 
                 simplemde = new SimpleMDE({
-                    // autosave: {
-                    //     enabled: true,
-                    //     uniqueId: "<%-fileId%>",
-                    //     delay: 1000,
-                    // },
+                    autosave: {
+                        enabled: true,
+                        uniqueId: "<%-fileId%>",
+                        delay: 1000,
+                    },
                     element: $("#editor")[0],
                     renderingConfig: {
                         singleLineBreaks: false,
@@ -67,7 +91,7 @@
 
             // Function to save File to GDrive
             // Also changes the name of the file too.
-            async function save(id)
+            async function save()
             {
                 var filename = null;
                 var id_FileName = $("#FileName")
@@ -113,18 +137,53 @@
         </script>
 
     </head>
-    <body class="">
+    <body>
         <%- include('header') %>
-        <div class="container-fluid p-0 pt-2">
-            <div class="input-group mb-3">
-                <input id="FileName" type="text" class="form-control" placeholder="<%=filemetadata.data.name%>">
-                <button onclick="save();" class="btn btn-primary" type="button">Rename</button>
+        <div class="container pt-2">
+            <div class="row">
+                <div class="col-md">
+                    <a class="btn btn-primary w-100 mb-2" data-bs-toggle="collapse" href="#Shortcuts" role="button" aria-expanded="false" aria-controls="collapseExample">
+                        Toggle Shortcut List
+                    </a>
+                    <div class="collapse mb-2" id="Shortcuts">
+                        <div class="card card-body">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Shortcut</th>
+                                        <th scope="col">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><code>ALT / CTRL + S</code></td>
+                                        <td>Save</td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>ALT + N</code></td>
+                                        <td>New File</td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>ALT / CTRL + O</code></td>
+                                        <td>Open File</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md">
+                    <div class="input-group mb-2">
+                        <span class="input-group-text">Filename</span>
+                        <input id="FileName" type="text" class="form-control" placeholder="<%=filemetadata.data.name%>">
+                        <button onclick="save();" class="btn btn-primary" type="button">Rename</button>
+                    </div>
+                </div>
             </div>
             <textarea id="editor" class="w-100"><%if(raw){%><%-raw.data%><%}%></textarea>
             <div id="save_button">
-                <button id="save_button" class="btn btn-primary" type="button" onclick="save();">
-                    <i class="fab fa-google-drive"></i> &nbsp; Save
-                    <span id="save_spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" hidden></span>
+                <button class="btn btn-primary" type="button" onclick="save();">
+                    <i class="fab fa-google-drive"></i> &nbsp; Save &nbsp; <span id="save_spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" hidden></span>
                 </button>
             </div>
             
