@@ -101,7 +101,8 @@ function pickerCallback(data)
     if (data.action == google.picker.Action.PICKED) {
         var fileId = data.docs[0].id;
         // window.location.replace('http://localhost:8080/editor?fileId=' + fileId);
-        window.location.replace('https://marknote.ue.r.appspot.com/editor?fileId=' + fileId);
+        // window.location.replace('https://marknote.ue.r.appspot.com/editor?fileId=' + fileId);
+        window.location.replace('<%=GLOBAL_ROOT%>/editor?fileId=' + fileId);
         // alert('The user selected: ' + fileId);
     }
 }
@@ -109,7 +110,7 @@ function pickerCallback(data)
 function newFilePickerCallback(data)
 {
     console.log("You Reached the new file picker callback" + JSON.stringify(data));
-    window.location.replace('https://marknote.ue.r.appspot.com/new?folderId=' + data.docs[0].id);
+    window.location.replace('<%=GLOBAL_ROOT%>/new?folderId=' + data.docs[0].id);
 }
 
 </script>

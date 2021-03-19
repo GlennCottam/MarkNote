@@ -16,7 +16,30 @@ console.log(
     "MIT License\n" + 
     "---------------------------------"
 );
+const config = require('../config/global');
 
+console.log("Setting Environment Variables");
+const _ENV = process.env;
+_ENV.IS_PRODUCTION = config.server.production;
+if(_ENV.IS_PRODUCTION === "true")
+{
+    _ENV.GLOBAL_URI = config.server.uri.production.url;
+    _ENV.GLOBAL_PORT = config.server.uri.production.port;
+    _ENV.GLOBAL_ROOT = config.server.uri.production.url;
+}
+else
+{
+    _ENV.GLOBAL_URI = config.server.uri.local.url;
+    _ENV.GLOBAL_PORT = config.server.uri.local.port;
+    _ENV.GLOBAL_ROOT = config.server.uri.local.url + ":" + config.server.uri.local.port;
+}
+
+console.log("GLOBAL VARIABLE SET: " +
+            "\n\tIS_PRODUCTION: " + _ENV.IS_PRODUCTION +
+            "\n\tGLOBAL_URI: " + _ENV.GLOBAL_URI +
+            "\n\tGLOBAL_PORT: " +  _ENV.GLOBAL_PORT +
+            "\n\tGLOBAL_ROOT: " + _ENV.GLOBAL_ROOT 
+);
 
 // Debug Statement for following imported packages
 console.log("Server Starting, Importing Tools.\n\tImporting: Express");
@@ -35,9 +58,6 @@ console.log("\tImporting: fs");
 const File_system = require('fs');
 
 // Setting Global Values
-const config = JSON.parse(File_system.readFileSync('config/global.json'));
-const adjuster = require('./file_adjuster');
-const port = config.server.port;
 const keys = require('../secure/keys');
 
 // GCloud scopes
@@ -49,38 +69,6 @@ const scopes = [
 /* 
     Global URL set for Testing on Localhost, or set to URL for application. 
 */
-// const global_web_uri = config.server.uri.local + ":" + port; // Comment Out When In production
-const global_web_uri = config.server.uri.production;      // Uncomment out when in production
-
-// Importing Body-Parser for HTTP requests
-console.log("\tImporting: Body-Parser");
-
-/* 
-    ! Showdown Framework
-    The Showdown framework is used to convert Markdown into
-        HTML. Here I will set the options I will need, and 
-        configure it for the usecase.
-*/
-console.log("\tImporting: Showdown");
-const showdown = require('showdown');
-console.log("\tImporting: Showdown-Highlight Extension");
-// https://github.com/Bloggify/showdown-highlight
-const showdownHighlight = require('showdown-highlight');
-showdown.setOption('ghCodeBlocks', 'true');
-showdown.setOption('tasklists', 'true');
-showdown.setOption('parseImgDimensions', 'true');
-showdown.setOption('allOn');
-// var mdconverter = new showdown.Converter();
-
-var mdconverter = new showdown.Converter({extensions: [showdownHighlight]});
-
-
-/*
-    HIghlight JS framework:
-        This framework highlights specific code snippts with
-        various themes and color schemes.
-*/
-const h1js = require('highlight.js');
 
 /*
     Google API's:
@@ -93,12 +81,11 @@ const {google} = require('googleapis');
 const drive = google.drive('v3');
 const {Datastore} = require('@google-cloud/datastore');
 const {DatastoreStore} = require('@google-cloud/connect-datastore');
-const { Stream } = require('stream');
 
 const oauth2Client = new google.auth.OAuth2(
     keys.google.clientID,
     keys.google.clientSecret,
-    config.server.uri.production,
+    _ENV.GLOBAL_URI + ":" + _ENV.GLOBAL_PORT + "/oauth2callback",
 );
 
 const global_auth_url = oauth2Client.generateAuthUrl({
@@ -115,22 +102,6 @@ console.log("Import Complete.");
                             Main Application
 ===============================================================================
 */
-
-// console.log("ENTRY_POINT: " + process.env.ENTRY_POINT + 
-//             "\nGCP_PROJECT: " + process.env.GCLOUD_PROJECT +
-//             "\nGOOGLE_CLOUD_PROJECT: " + process.env.GOOGLE_CLOUD_PROJECT +
-//             "\nFUNCTION_TRIGGER_TYPE: " + process.env.FUNCTION_TRIGGER_TYPE +
-//             "\nFUNCTION_NAME: " + process.env.FUNCTION_NAME + 
-//             "\nFUNCTION_MEMORY_MB: " + process.env.FUNCTION_MEMORY_MB +
-//             "\nFUNCTION_TIMEOUT_SEC: " + process.env.FUNCTION_TIMEOUT_SEC + 
-//             "\nFUNCTION_IDENTITY: " + process.env.FUNCTION_IDENTITY +
-//             "\nFUNCTION_REGION: " + process.env.FUNCTION_REGION + 
-//             "\nFUNCTION_TARGET: " + process.env.FUNCTION_TARGET + 
-//             "\nFUNCTION_SIGNATURE_TYPE: " + process.env.FUNCTION_SIGNATURE_TYPE +
-//             "\nK_SERVICE: " + process.env.K_SERVICE +
-//             "\nK_REVISION: " + process.env.K_REVISION +
-//             "\nPORT: " + process.env.PORT
-// );
 
 /*
     Express Server:
@@ -154,7 +125,7 @@ app.use(session({
     }),
     secret: 'my-secret',
     resave: false,
-    saveUninitialized: false,
+    saveUninitialized: true,
 }));
 
 // On every request, do this:
@@ -239,11 +210,11 @@ app.get('/', function(req, res)
     // If Logged in:
     if(req.session.user)
     {
-        res.render('index', {user: req.session.user});
+        res.render('index', {GLOBAL_ROOT: _ENV.GLOBAL_ROOT, user: req.session.user});
     }
     else
     {
-        res.render('index', {user: null});
+        res.render('index', {GLOBAL_ROOT: _ENV.GLOBAL_ROOT, user: null});
     }
     
 });
@@ -314,7 +285,7 @@ app.get('/editor', async function(req, res)
         // console.log("FILE DATA: " + JSON.stringify(file));
         // console.log("Filename: " + file_name.data.name);
 
-        res.render('editor', {user: req.session.user, raw: file, fileId: fileId, filemetadata: metadata});
+        res.render('editor', {GLOBAL_ROOT: _ENV.GLOBAL_ROOT, user: req.session.user, raw: file, fileId: fileId, filemetadata: metadata});
     }
     else
     {
@@ -363,7 +334,7 @@ app.post('/save', async function(req, res)
 // Error Page
 app.get('/error', function(req, res)
 {
-    res.render('error');
+    res.render('error', {GLOBAL_ROOT: _ENV.GLOBAL_ROOT,});
 });
 
 app.on('error', function(req, res)
@@ -372,7 +343,7 @@ app.on('error', function(req, res)
 });
 
 // Web server startup.
-app.listen(port, function()
+app.listen(_ENV.GLOBAL_PORT, function()
 {
-    console.log("Server Ready on URL: " + global_web_uri);
+    console.log("Server Ready on URL: " + _ENV.GLOBAL_URI);
 });

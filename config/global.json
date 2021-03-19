@@ -1,9 +1,10 @@
 {
     "server": {
         "port": 8080,
+        "production": false,
         "uri": {
             "local": "http://localhost",
-            "prodcution": "https://marknote.ue.r.appspot.com"
+            "production": "https://marknote.ue.r.appspot.com"
         }
     }
 }

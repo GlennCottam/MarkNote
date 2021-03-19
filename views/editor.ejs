@@ -34,7 +34,7 @@
         </style>
         <script>
             // const base_url = "http://localhost:8080/";
-            const base_url = "https://marknote.ue.r.appspot.com/";
+            const base_url = "<%=GLOBAL_ROOT%>" + "/";
             var simplemde;
 
             // Keypress Methods!
@@ -83,6 +83,7 @@
                     //     delay: 1000,
                     // },
                     element: $("#editor")[0],
+                    spellChecker: false,
                     renderingConfig: {
                         singleLineBreaks: false,
                         codeSyntaxHighlighting: true,
