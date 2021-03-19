@@ -98,7 +98,7 @@ const { Stream } = require('stream');
 const oauth2Client = new google.auth.OAuth2(
     keys.google.clientID,
     keys.google.clientSecret,
-    keys.google.redirectURL,
+    config.server.uri.production,
 );
 
 const global_auth_url = oauth2Client.generateAuthUrl({
@@ -116,6 +116,21 @@ console.log("Import Complete.");
 ===============================================================================
 */
 
+// console.log("ENTRY_POINT: " + process.env.ENTRY_POINT + 
+//             "\nGCP_PROJECT: " + process.env.GCLOUD_PROJECT +
+//             "\nGOOGLE_CLOUD_PROJECT: " + process.env.GOOGLE_CLOUD_PROJECT +
+//             "\nFUNCTION_TRIGGER_TYPE: " + process.env.FUNCTION_TRIGGER_TYPE +
+//             "\nFUNCTION_NAME: " + process.env.FUNCTION_NAME + 
+//             "\nFUNCTION_MEMORY_MB: " + process.env.FUNCTION_MEMORY_MB +
+//             "\nFUNCTION_TIMEOUT_SEC: " + process.env.FUNCTION_TIMEOUT_SEC + 
+//             "\nFUNCTION_IDENTITY: " + process.env.FUNCTION_IDENTITY +
+//             "\nFUNCTION_REGION: " + process.env.FUNCTION_REGION + 
+//             "\nFUNCTION_TARGET: " + process.env.FUNCTION_TARGET + 
+//             "\nFUNCTION_SIGNATURE_TYPE: " + process.env.FUNCTION_SIGNATURE_TYPE +
+//             "\nK_SERVICE: " + process.env.K_SERVICE +
+//             "\nK_REVISION: " + process.env.K_REVISION +
+//             "\nPORT: " + process.env.PORT
+// );
 
 /*
     Express Server:
