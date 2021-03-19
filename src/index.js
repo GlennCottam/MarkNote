@@ -124,8 +124,8 @@ app.use(session({
         })
     }),
     secret: 'my-secret',
-    resave: false,
-    saveUninitialized: true,
+    resave: true,
+    saveUninitialized: false,
 }));
 
 // On every request, do this:
