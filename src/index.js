@@ -85,11 +85,11 @@ const {DatastoreStore} = require('@google-cloud/connect-datastore');
 const oauth2Client = new google.auth.OAuth2(
     keys.google.clientID,
     keys.google.clientSecret,
-    _ENV.GLOBAL_URI + ":" + _ENV.GLOBAL_PORT + "/oauth2callback",
+    _ENV.GLOBAL_ROOT + "/oauth2callback",
 );
 
 const global_auth_url = oauth2Client.generateAuthUrl({
-    access_type: 'online',
+    access_type: 'offline',
     scope: scopes
 });
 
@@ -131,15 +131,26 @@ app.use(session({
 // On every request, do this:
 app.use(function(req, res, next)
 {
-    // Check for session in database, and set tokens.
-    if(req.session.user)
-    {
-        console.log("Setting User Tokens");
-        oauth2Client.setCredentials(req.session.user.tokens.tokens);
-    }
+    oauth2Client.getAccessToken();
+    // // Check for session in database, and set tokens.
+    // if(req.session.user)
+    // {
+    //     console.log("Setting User Tokens");
+    //     oauth2Client.setCredentials(req.session.user.tokens.tokens);
+    // }
     console.log("REQUEST: " + req.url);
     next();
-})
+});
+
+// Access Token Refresher
+oauth2Client.on('tokens', (tokens) => 
+{
+    if(tokens.refresh_token)
+    {
+        console.log(tokens.refresh_token);
+    }
+    console.log(tokens.access_token);
+});
 
 /*
     The Server Itself:
@@ -160,7 +171,7 @@ app.get('/oauth2callback', async function(req, res)
     // Grabs the Code from Google, turns it in for a token
     var code = req.query.code;
     var {tokens} = await oauth2Client.getToken(code);
-    console.log("New Tokens: \n" + JSON.stringify(tokens));
+    console.log("TOKENS: " + JSON.stringify(tokens));
     oauth2Client.setCredentials(tokens);
 
     // Grabs user information, sets it in the express-session
