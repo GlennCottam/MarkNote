@@ -81,6 +81,7 @@ const {google} = require('googleapis');
 const drive = google.drive('v3');
 const {Datastore} = require('@google-cloud/datastore');
 const {DatastoreStore} = require('@google-cloud/connect-datastore');
+const userStore = require('./userStore');
 
 const oauth2Client = new google.auth.OAuth2(
     keys.google.clientID,
@@ -113,6 +114,7 @@ app.use(Cors());
 app.enable('trust proxy');                                                        // Sets Cors Policy
 app.set('view engine', 'ejs');
 app.use(Express.urlencoded({extended: false}));
+
 // Save sessions to Google Datastore
 app.use(session({
     store: new DatastoreStore({
@@ -128,10 +130,18 @@ app.use(session({
     saveUninitialized: false,
 }));
 
+
 // On every request, do this:
-app.use(function(req, res, next)
+app.use(async function(req, res, next)
 {
-    oauth2Client.getAccessToken();
+    if(req.session.user)
+    {
+        oauth2Client.setCredentials(await userStore.getTokens(req.session.user.id));
+        var new_access_token = oauth2Client.getAccessToken();
+        console.log("New Access Token: " + JSON.stringify(new_access_token));
+    }
+    
+    
     // // Check for session in database, and set tokens.
     // if(req.session.user)
     // {
@@ -174,6 +184,9 @@ app.get('/oauth2callback', async function(req, res)
     console.log("TOKENS: " + JSON.stringify(tokens));
     oauth2Client.setCredentials(tokens);
 
+
+    
+
     // Grabs user information, sets it in the express-session
     var user = await google.people('v1').people.get({
         resourceName: 'people/me',
@@ -185,6 +198,9 @@ app.get('/oauth2callback', async function(req, res)
     // After: <googleid>
     var user_id = user.data.resourceName.replace('people/', '');
     console.log("User ID: " + user_id);
+
+    await userStore.saveUser(user_id, tokens.access_token, tokens.refresh_token);
+    
 
     var user_data = 
     {
@@ -269,7 +285,7 @@ app.get('/new', async function(req, res)
 
         }
 
-    })
+    });
 
     function finish(data)
     {

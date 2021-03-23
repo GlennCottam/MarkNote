@@ -187,7 +187,7 @@
                     else if(response.saved == false)
                     {
                         showToast('danger', 'File Failed to save<br>Try logging out and loggin back in.');
-                        console.log("ERROR: " + response);
+                        console.log("ERROR: " + JSON.stringify(response));
                     }
                 });
                 // Stop Spinner

@@ -1,7 +1,0 @@
-indexes:
-
-- kind: user
-  ancestor: no
-  properties: 
-    - googleId: name
-      direction: desc 
