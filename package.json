@@ -4,8 +4,9 @@
   "description": "An Elegant markdown document writer",
   "main": "src/index.js",
   "scripts": {
-    "test": "nodemon --watch src/ --watch config/ src/index.js",
+    "test": "nodemon -L --watch src/ --watch config/ src/index.js",
     "test_oauth2": "nodemon --watch src/ --watch config src/oauth2test2.js",
+    "gcloud_test": "node src/test_gcloud_auth.js",
     "start": "node src/index.js",
     "create": "gcloud app create",
     "deploy": "gcloud app deploy"
@@ -20,11 +21,13 @@
   "author": "Glenn Cottam",
   "license": "AGPL-3.0",
   "devDependencies": {
+    "@google-cloud/storage": "^5.8.2",
     "nodemon": "^2.0.7"
   },
   "dependencies": {
     "@google-cloud/connect-datastore": "^5.0.2",
     "@google-cloud/datastore": "^6.3.1",
+    "colors": "^1.4.0",
     "cors": "^2.8.5",
     "ejs": "^3.1.5",
     "express": "^4.17.1",

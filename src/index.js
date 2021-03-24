@@ -17,6 +17,7 @@ console.log(
     "---------------------------------"
 );
 const config = require('../config/global');
+const logger = require('./logger');
 
 console.log("Setting Environment Variables");
 const _ENV = process.env;
@@ -136,9 +137,29 @@ app.use(async function(req, res, next)
 {
     if(req.session.user)
     {
-        oauth2Client.setCredentials(await userStore.getTokens(req.session.user.id));
-        var new_access_token = oauth2Client.getAccessToken();
-        console.log("New Access Token: " + JSON.stringify(new_access_token));
+        logger.debug("User session exists, testing to see if token needs to be refreshed.");
+        var saved_user = await userStore.getData(req.session.user.id);
+        logger.debug("User data pulled.")
+
+        if(saved_user.expiry <= saved_user.timestamp)
+        {
+            logger.debug("Token needs to be refreshed, attempting to do so now.");
+            logger.info("saved_user.refresh_token: " + saved_user.refresh_token);
+            // Refresh Token!
+            await getTokenWithRefresh(saved_user.refresh_token, req);
+            // logger.info("New Tokens: " + tokens);
+            // logger.debug("Tokens received, attempting to apply");
+            
+            // logger.debug("Tokens set in oauth2client, finished refresh procedure.")
+            // console.log("NEW TOKENS: " + JSON.stringify(tokens));
+        }
+        else
+        {
+            logger.debug("User token still active, no need to refresh.")
+        }
+        // oauth2Client.setCredentials(await userStore.getTokens(req.session.user.id));
+        // var new_access_token = oauth2Client.getAccessToken();
+        // console.log("New Access Token: " + JSON.stringify(new_access_token));
     }
     
     
@@ -148,19 +169,49 @@ app.use(async function(req, res, next)
     //     console.log("Setting User Tokens");
     //     oauth2Client.setCredentials(req.session.user.tokens.tokens);
     // }
-    console.log("REQUEST: " + req.url);
+
+    logger.info("REQUEST: " + req.url);
     next();
 });
 
-// Access Token Refresher
-oauth2Client.on('tokens', (tokens) => 
-{
-    if(tokens.refresh_token)
-    {
-        console.log(tokens.refresh_token);
+oauth2Client.on('tokens', (tokens) => {
+    if (tokens.refresh_token) {
+      // store the refresh_token in my database!
+      console.log(tokens.refresh_token);
     }
     console.log(tokens.access_token);
 });
+
+
+async function getTokenWithRefresh(refresh_token, request)
+{
+    new Promise(async function(resolve)
+    {
+        logger.debug("Requesting new Access Token using existing refresh token: " + JSON.stringify(refresh_token));
+        oauth2Client.setCredentials({
+            refresh_token: refresh_token
+        });
+    
+        // oauth2Client.credentials.refresh_token = refresh_token;
+        await oauth2Client.refreshAccessToken( function(err, tokens)
+        {
+            if(err) 
+            { 
+                logger.error("Error grabbing new Access Token: " + err);
+                resolve(null);
+            }
+            else
+            {
+                logger.debug("New Tokens: " + JSON.stringify(tokens));
+                oauth2Client.setCredentials(tokens);
+
+                userStore.saveUser(request.session.user.id, tokens.access_token, refresh_token, tokens.expiry_date);
+                request.session.user.data.access_token = tokens.access_token;
+                resolve(tokens);
+            }
+        });
+    });
+}
 
 /*
     The Server Itself:
@@ -184,9 +235,6 @@ app.get('/oauth2callback', async function(req, res)
     console.log("TOKENS: " + JSON.stringify(tokens));
     oauth2Client.setCredentials(tokens);
 
-
-    
-
     // Grabs user information, sets it in the express-session
     var user = await google.people('v1').people.get({
         resourceName: 'people/me',
@@ -199,7 +247,26 @@ app.get('/oauth2callback', async function(req, res)
     var user_id = user.data.resourceName.replace('people/', '');
     console.log("User ID: " + user_id);
 
-    await userStore.saveUser(user_id, tokens.access_token, tokens.refresh_token);
+    var users = await userStore.getData(user_id);
+    // If no user exists, first time sign in.
+    // On first time sign-in store everything
+    // If not first time sign-in, grab refresh token, and resave.
+
+    if(users)
+    {
+        // User exists, saving everything but refresh token
+        logger.debug("User has already signed in, saving everything but refresh token");
+        logger.info("REFRESH TOKEN: " + JSON.stringify(users.refresh_token));
+        await userStore.updateAccessToken(user_id, tokens.access_token, tokens.expiry_date);
+    }
+    else
+    {
+        logger.debug("First time user, creating entry");
+        await userStore.saveUser(user_id, tokens.access_token, tokens.refresh_token, tokens.expiry_date);
+        
+    }
+
+    // await userStore.saveUser(user_id, tokens.access_token, tokens.refresh_token, tokens.expiry_date);
     
 
     var user_data = 
@@ -246,12 +313,10 @@ app.get('/', function(req, res)
     
 });
 
-// TODO: Delete this horrible shit
 app.get('/new', async function(req, res)
 {
     // Once Folder has been selected, Give it the name Untitled, and create to drive.
     // Once created, redirect to editor with file id.
-    // TODO: Implement a way to change filename.
 
     var folderId = req.query.folderId;
 
@@ -372,5 +437,5 @@ app.on('error', function(req, res)
 // Web server startup.
 app.listen(_ENV.GLOBAL_PORT, function()
 {
-    console.log("Server Ready on URL: " + _ENV.GLOBAL_URI);
+    console.log("Server Ready on URL: " + _ENV.GLOBAL_URI + ":" + _ENV.GLOBAL_PORT);
 });
