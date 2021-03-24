@@ -67,7 +67,6 @@ global_methods.getData = async function(id)
     ;
 
     const [users] = await datastore.runQuery(query);
-    console.log("Users: " + JSON.stringify(users[0]));
     return users[0];
 }
 

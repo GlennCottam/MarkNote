@@ -6,8 +6,10 @@
 
     V 0.0.1
 */
+const config = require('../config/global');
+const logger = require('./logger');
 
-console.log(
+logger.startup.splash(
     "---------------------------------\n" +
     "░█▄█░█▀█░█▀▄░█░█░█▀█░█▀█░▀█▀░█▀▀\n" + 
     "░█░█░█▀█░█▀▄░█▀▄░█░█░█░█░░█░░█▀▀\n" + 
@@ -16,10 +18,9 @@ console.log(
     "MIT License\n" + 
     "---------------------------------"
 );
-const config = require('../config/global');
-const logger = require('./logger');
 
-console.log("Setting Environment Variables");
+
+logger.startup("Setting Environment Variables");
 const _ENV = process.env;
 _ENV.IS_PRODUCTION = config.server.production;
 if(_ENV.IS_PRODUCTION === "true")
@@ -35,7 +36,7 @@ else
     _ENV.GLOBAL_ROOT = config.server.uri.local.url + ":" + config.server.uri.local.port;
 }
 
-console.log("GLOBAL VARIABLE SET: " +
+logger.startup("GLOBAL VARIABLE SET: " +
             "\n\tIS_PRODUCTION: " + _ENV.IS_PRODUCTION +
             "\n\tGLOBAL_URI: " + _ENV.GLOBAL_URI +
             "\n\tGLOBAL_PORT: " +  _ENV.GLOBAL_PORT +
@@ -43,7 +44,7 @@ console.log("GLOBAL VARIABLE SET: " +
 );
 
 // Debug Statement for following imported packages
-console.log("Server Starting, Importing Tools.\n\tImporting: Express");
+logger.startup("Server Starting, Importing Tools.\n\tImporting: Express");
 
 // Importing Express Webserver
 const Express = require('express');
@@ -97,7 +98,7 @@ const global_auth_url = oauth2Client.generateAuthUrl({
 
 google.options({auth: oauth2Client});
 
-console.log("Import Complete.");
+logger.success("Import Complete.");
 
 /*
 ===============================================================================
@@ -139,14 +140,16 @@ app.use(async function(req, res, next)
     {
         logger.debug("User session exists, testing to see if token needs to be refreshed.");
         var saved_user = await userStore.getData(req.session.user.id);
-        logger.debug("User data pulled.")
+        logger.debug("User data pulled.");
 
-        if(saved_user.expiry <= saved_user.timestamp)
+        // do it before 5 mins
+        if(saved_user.expiry <= saved_user.timestamp - 300000)
         {
             logger.debug("Token needs to be refreshed, attempting to do so now.");
             logger.info("saved_user.refresh_token: " + saved_user.refresh_token);
             // Refresh Token!
             await getTokenWithRefresh(saved_user.refresh_token, req);
+            
             // logger.info("New Tokens: " + tokens);
             // logger.debug("Tokens received, attempting to apply");
             
@@ -155,7 +158,11 @@ app.use(async function(req, res, next)
         }
         else
         {
-            logger.debug("User token still active, no need to refresh.")
+            logger.debug("User token still active, no need to refresh.");
+            oauth2Client.setCredentials({
+                refresh_token: saved_user.refresh_token,
+                access_token: saved_user.access_token
+            });
         }
         // oauth2Client.setCredentials(await userStore.getTokens(req.session.user.id));
         // var new_access_token = oauth2Client.getAccessToken();
@@ -207,6 +214,7 @@ async function getTokenWithRefresh(refresh_token, request)
 
                 userStore.saveUser(request.session.user.id, tokens.access_token, refresh_token, tokens.expiry_date);
                 request.session.user.data.access_token = tokens.access_token;
+                oauth2Client.setCredentials(tokens);
                 resolve(tokens);
             }
         });
@@ -437,5 +445,6 @@ app.on('error', function(req, res)
 // Web server startup.
 app.listen(_ENV.GLOBAL_PORT, function()
 {
-    console.log("Server Ready on URL: " + _ENV.GLOBAL_URI + ":" + _ENV.GLOBAL_PORT);
+    logger.success("Server Ready on URL: " + _ENV.GLOBAL_URI + ":" + _ENV.GLOBAL_PORT);
+    // console.log("Server Ready on URL: " + _ENV.GLOBAL_URI + ":" + _ENV.GLOBAL_PORT);
 });

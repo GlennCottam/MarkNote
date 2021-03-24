@@ -27,5 +27,16 @@ global_methods.info = function(text)
     console.log("[INFOM]\t".cyan + text);
 }
 
+global_methods.startup = function(text)
+{
+    console.log("[INFOM]\t".italic.magenta + text.italic);
+}
+
+global_methods.startup.splash = function(text)
+{
+    console.log(text.blue);
+}
+
+
 
 module.exports = global_methods;
