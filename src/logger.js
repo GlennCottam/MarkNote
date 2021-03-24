@@ -9,7 +9,7 @@ global_methods.debug = function(text)
 
 global_methods.error = function(text)
 {
-    console.log("[ERROR]\t".red + text);
+    console.log("[ERROR]\t".red + text.red);
 }
 
 global_methods.success = function(text)

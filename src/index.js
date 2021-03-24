@@ -143,18 +143,13 @@ app.use(async function(req, res, next)
         logger.debug("User data pulled.");
 
         // do it before 5 mins
-        if(saved_user.expiry <= saved_user.timestamp - 300000)
+        if(saved_user.expiry <= Date.now() - 300000)
         {
             logger.debug("Token needs to be refreshed, attempting to do so now.");
             logger.info("saved_user.refresh_token: " + saved_user.refresh_token);
+
             // Refresh Token!
             await getTokenWithRefresh(saved_user.refresh_token, req);
-            
-            // logger.info("New Tokens: " + tokens);
-            // logger.debug("Tokens received, attempting to apply");
-            
-            // logger.debug("Tokens set in oauth2client, finished refresh procedure.")
-            // console.log("NEW TOKENS: " + JSON.stringify(tokens));
         }
         else
         {
@@ -163,19 +158,17 @@ app.use(async function(req, res, next)
                 refresh_token: saved_user.refresh_token,
                 access_token: saved_user.access_token
             });
+
+            req.session.user.tokens.tokens.refresh_token = saved_user.refresh_token;
+            req.session.user.tokens.tokens.access_token = saved_user.access_token;
+
+            // logger.debug("{every request} New Session Data: " + JSON.stringify(req.session.user));
+            
         }
         // oauth2Client.setCredentials(await userStore.getTokens(req.session.user.id));
         // var new_access_token = oauth2Client.getAccessToken();
         // console.log("New Access Token: " + JSON.stringify(new_access_token));
     }
-    
-    
-    // // Check for session in database, and set tokens.
-    // if(req.session.user)
-    // {
-    //     console.log("Setting User Tokens");
-    //     oauth2Client.setCredentials(req.session.user.tokens.tokens);
-    // }
 
     logger.info("REQUEST: " + req.url);
     next();
@@ -215,6 +208,8 @@ async function getTokenWithRefresh(refresh_token, request)
                 userStore.saveUser(request.session.user.id, tokens.access_token, refresh_token, tokens.expiry_date);
                 request.session.user.data.access_token = tokens.access_token;
                 oauth2Client.setCredentials(tokens);
+                request.session.user.tokens = tokens;
+                logger.debug("New Session Tokens Set" + JSON.stringify(request.session.user.tokens));
                 resolve(tokens);
             }
         });
@@ -253,13 +248,13 @@ app.get('/oauth2callback', async function(req, res)
     // Before: people/<googleid>
     // After: <googleid>
     var user_id = user.data.resourceName.replace('people/', '');
-    console.log("User ID: " + user_id);
+    logger.info("User ID: " + user_id);
 
     var users = await userStore.getData(user_id);
+
     // If no user exists, first time sign in.
     // On first time sign-in store everything
     // If not first time sign-in, grab refresh token, and resave.
-
     if(users)
     {
         // User exists, saving everything but refresh token
@@ -274,9 +269,6 @@ app.get('/oauth2callback', async function(req, res)
         
     }
 
-    // await userStore.saveUser(user_id, tokens.access_token, tokens.refresh_token, tokens.expiry_date);
-    
-
     var user_data = 
     {
         id: user_id,
@@ -290,16 +282,30 @@ app.get('/oauth2callback', async function(req, res)
 
 });
 
+// Endpoint: '/token': Allows the client to grab the access token
+app.get('/token', function(req, res)
+{
+    if(req.session.user)
+    {
+        res.json(req.session.user.tokens.tokens.access_token);
+        res.end();
+    }
+    else
+    {
+        logger.info("{/token} User is NOT signed in, delivering null");
+        res.json(null);
+        res.end();
+    }
+});
+
 // Endpoint: '/logout': Allows the user to logout of their account.
 app.get('/logout', function(req, res)
 {
     // TODO: When logout: de-auth app so they can choose another account
-    // req.logout();
     req.session.destroy(function(err)
     {
         if(err) {throw err};
     });
-    // res.send(req.user);
     res.redirect('/');
 });
 
@@ -308,7 +314,6 @@ app.get('/logout', function(req, res)
 app.get('/', function(req, res)
 {
     
-    // console.log("User Data from Session: " + JSON.stringify(req.session) + "\nID: " + req.session.id);
     // If Logged in:
     if(req.session.user)
     {
@@ -328,8 +333,6 @@ app.get('/new', async function(req, res)
 
     var folderId = req.query.folderId;
 
-    console.log(folderId);
-
     var fileMetadata = 
     {
         'name': 'Untitled.md',
@@ -348,14 +351,12 @@ app.get('/new', async function(req, res)
     {
         if(err)
         {
-            console.log(err); 
+            logger.error(err);
             finish({err: err});
         }
         else
         {
-            console.log("FILE DATA: " + JSON.stringify(res));
             finish(res.data.id);
-
         }
 
     });
@@ -382,9 +383,6 @@ app.get('/editor', async function(req, res)
             fileId: fileId,
         });
 
-        // console.log("FILE DATA: " + JSON.stringify(file));
-        // console.log("Filename: " + file_name.data.name);
-
         res.render('editor', {GLOBAL_ROOT: _ENV.GLOBAL_ROOT, user: req.session.user, raw: file, fileId: fileId, filemetadata: metadata});
     }
     else
@@ -397,9 +395,7 @@ app.get('/editor', async function(req, res)
 
 app.post('/save', async function(req, res)
 {
-    // console.log("\nFileID: " + req.body.fileId + "Data: " + req.body.data);
-
-    console.log("FILEDATA: \tFILENAME: " + req.body.fileName);
+    logger.info("FILEDATA: \tFILENAME: " + req.body.fileName);
     var file = await drive.files.update({
         fileId: req.body.fileId,
         resource:
@@ -414,7 +410,8 @@ app.post('/save', async function(req, res)
     }, (err, res) =>
     {
         if(err) {
-            finish({saved: false, err: err})
+            logger.error(err);
+            finish({saved: false, err: err});
         }
         else
         {
@@ -446,5 +443,4 @@ app.on('error', function(req, res)
 app.listen(_ENV.GLOBAL_PORT, function()
 {
     logger.success("Server Ready on URL: " + _ENV.GLOBAL_URI + ":" + _ENV.GLOBAL_PORT);
-    // console.log("Server Ready on URL: " + _ENV.GLOBAL_URI + ":" + _ENV.GLOBAL_PORT);
 });

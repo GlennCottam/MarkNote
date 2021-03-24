@@ -25,6 +25,7 @@ var scope = ['https://www.googleapis.com/auth/drive.file'];
 
 var pickerApiLoaded = false;
 var oauthToken = "<%=user.tokens.tokens.access_token%>";
+// var oauthToken = null;
 
 // Use the Google API Loader script to load the google.picker script.
 function loadPicker() {
@@ -32,12 +33,19 @@ function loadPicker() {
 gapi.load('picker', {'callback': onPickerApiLoad});
 }
 
+async function getToken()
+{
+    var access_token = await $.get("<%=GLOBAL_ROOT%>/token");
+    console.log("Access Token : " + JSON.stringify(access_token));
+    return access_token;
+}
+
 function onPickerApiLoad() {
     pickerApiLoaded = true;
 }
 
 // Create and render a Picker object for searching images.
-function createPicker() 
+async function createPicker() 
 {
     var markdown_view = new google.picker
                             .View(google.picker.ViewId.DOCS, google.picker.DocsViewMode.LIST)
@@ -48,7 +56,8 @@ function createPicker()
                             .setIncludeFolders(true)
                             .setOwnedByMe(true)
                             .setMode(google.picker.DocsViewMode.LIST);
-
+    // oauthToken = await getToken();
+    // console.log("Picker has token: " + JSON.stringify(oauthToken));
     if (pickerApiLoaded && oauthToken)
     {
         var picker = new google.picker.PickerBuilder()
@@ -80,6 +89,7 @@ function createNewFilePicker()
 
     if (pickerApiLoaded && oauthToken)
     {
+        
         var picker = new google.picker.PickerBuilder()
         .enableFeature(google.picker.Feature.MINE_ONLY)
         .enableFeature(google.picker.Feature.NAV_HIDDEN)
