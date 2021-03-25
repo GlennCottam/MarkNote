@@ -27,6 +27,7 @@
   "dependencies": {
     "@google-cloud/connect-datastore": "^5.0.2",
     "@google-cloud/datastore": "^6.3.1",
+    "codemirror": "^5.60.0",
     "colors": "^1.4.0",
     "cors": "^2.8.5",
     "ejs": "^3.1.5",
@@ -35,6 +36,10 @@
     "fs": "0.0.1-security",
     "googleapis": "^67.0.0",
     "highlight.js": "^10.6.0",
+    "hypermd": "^0.3.11",
+    "katex": "^0.10.2",
+    "marked": "^2.0.1",
+    "parcel-bundler": "^1.12.5",
     "showdown": "^1.9.1",
     "showdown-highlight": "^2.1.6",
     "simplemde": "^1.11.2"

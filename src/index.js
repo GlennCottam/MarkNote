@@ -111,7 +111,8 @@ logger.success("Import Complete.");
         Below are the URL access points the server will listen for.
 */
 // Setting up the server with frameworks
-app.use(Express.static('public'));                                              // Sets public directory
+app.use('/public', Express.static('public'));         
+app.use('/node_modules/', Express.static('node_modules'))
 app.use(Cors());        
 app.enable('trust proxy');                                                        // Sets Cors Policy
 app.set('view engine', 'ejs');
