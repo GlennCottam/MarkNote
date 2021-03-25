@@ -140,20 +140,22 @@ app.use(async function(req, res, next)
     {
         logger.debug("User session exists, testing to see if token needs to be refreshed.");
         var saved_user = await userStore.getData(req.session.user.id);
-        logger.debug("User data pulled.");
+        // logger.debug("User data pulled.");
+        var now = Date.now();
+        // logger.info("Current Timestamp: " + now)
 
         // do it before 5 mins
-        if(saved_user.expiry <= Date.now() - 300000)
+        if(saved_user.expiry <= now + 300000)
         {
-            logger.debug("Token needs to be refreshed, attempting to do so now.");
-            logger.info("saved_user.refresh_token: " + saved_user.refresh_token);
+            logger.warning("Token needs to be refreshed, attempting to do so now.");
+            // logger.info("saved_user.refresh_token: " + saved_user.refresh_token);
 
             // Refresh Token!
             await getTokenWithRefresh(saved_user.refresh_token, req);
         }
         else
         {
-            logger.debug("User token still active, no need to refresh.");
+            logger.dim("User token still active, no need to refresh.");
             oauth2Client.setCredentials({
                 refresh_token: saved_user.refresh_token,
                 access_token: saved_user.access_token
@@ -165,34 +167,21 @@ app.use(async function(req, res, next)
             // logger.debug("{every request} New Session Data: " + JSON.stringify(req.session.user));
             
         }
-        // oauth2Client.setCredentials(await userStore.getTokens(req.session.user.id));
-        // var new_access_token = oauth2Client.getAccessToken();
-        // console.log("New Access Token: " + JSON.stringify(new_access_token));
+
     }
 
     logger.info("REQUEST: " + req.url);
     next();
 });
 
-oauth2Client.on('tokens', (tokens) => {
-    if (tokens.refresh_token) {
-      // store the refresh_token in my database!
-      console.log(tokens.refresh_token);
-    }
-    console.log(tokens.access_token);
-});
-
-
 async function getTokenWithRefresh(refresh_token, request)
 {
     new Promise(async function(resolve)
     {
-        logger.debug("Requesting new Access Token using existing refresh token: " + JSON.stringify(refresh_token));
         oauth2Client.setCredentials({
             refresh_token: refresh_token
         });
     
-        // oauth2Client.credentials.refresh_token = refresh_token;
         await oauth2Client.refreshAccessToken( function(err, tokens)
         {
             if(err) 
@@ -202,14 +191,14 @@ async function getTokenWithRefresh(refresh_token, request)
             }
             else
             {
-                logger.debug("New Tokens: " + JSON.stringify(tokens));
+                // logger.debug("New Tokens: " + JSON.stringify(tokens));
                 oauth2Client.setCredentials(tokens);
 
                 userStore.saveUser(request.session.user.id, tokens.access_token, refresh_token, tokens.expiry_date);
-                request.session.user.data.access_token = tokens.access_token;
+                request.session.user.tokens.tokens.access_token = tokens.access_token;
+                request.session.user.tokens.tokens.refresh_token = tokens.refresh_token;
                 oauth2Client.setCredentials(tokens);
-                request.session.user.tokens = tokens;
-                logger.debug("New Session Tokens Set" + JSON.stringify(request.session.user.tokens));
+                // logger.debug("New Session Tokens Set" + JSON.stringify(request.session.user.tokens));
                 resolve(tokens);
             }
         });
@@ -225,7 +214,6 @@ async function getTokenWithRefresh(refresh_token, request)
 // Endpoint: '/login': The login endpoint will focus on logging the user in.
 app.get('/login', function(req, res)
 {
-    // console.log("ENDPOINT: '/login'");
     res.redirect(global_auth_url);
 });
 
@@ -259,7 +247,7 @@ app.get('/oauth2callback', async function(req, res)
     {
         // User exists, saving everything but refresh token
         logger.debug("User has already signed in, saving everything but refresh token");
-        logger.info("REFRESH TOKEN: " + JSON.stringify(users.refresh_token));
+        // logger.info("REFRESH TOKEN: " + JSON.stringify(users.refresh_token));
         await userStore.updateAccessToken(user_id, tokens.access_token, tokens.expiry_date);
     }
     else
@@ -292,7 +280,6 @@ app.get('/token', function(req, res)
     }
     else
     {
-        logger.info("{/token} User is NOT signed in, delivering null");
         res.json(null);
         res.end();
     }

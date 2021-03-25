@@ -37,6 +37,11 @@ global_methods.startup.splash = function(text)
     console.log(text.blue);
 }
 
+global_methods.dim = function(text)
+{
+    console.log("[DIM ]".dim + text.dim);
+}
+
 
 
 module.exports = global_methods;

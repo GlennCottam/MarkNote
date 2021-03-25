@@ -24,7 +24,7 @@ var appId = "marknote";
 var scope = ['https://www.googleapis.com/auth/drive.file'];
 
 var pickerApiLoaded = false;
-var oauthToken = "<%=user.tokens.tokens.access_token%>";
+var oauthToken = null// "<%=user.tokens.tokens.access_token%>";
 // var oauthToken = null;
 
 // Use the Google API Loader script to load the google.picker script.
@@ -47,6 +47,7 @@ function onPickerApiLoad() {
 // Create and render a Picker object for searching images.
 async function createPicker() 
 {
+    oauthToken = await $.get("<%=GLOBAL_ROOT%>/token");
     var markdown_view = new google.picker
                             .View(google.picker.ViewId.DOCS, google.picker.DocsViewMode.LIST)
                             .setMimeTypes('text/markdown');
