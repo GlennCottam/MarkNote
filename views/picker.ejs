@@ -24,12 +24,10 @@ var appId = "marknote";
 var scope = ['https://www.googleapis.com/auth/drive.file'];
 
 var pickerApiLoaded = false;
-var oauthToken = null// "<%=user.tokens.tokens.access_token%>";
-// var oauthToken = null;
+var oauthToken = null;
 
 // Use the Google API Loader script to load the google.picker script.
 function loadPicker() {
-//   gapi.load('auth', {'callback': onAuthApiLoad});
 gapi.load('picker', {'callback': onPickerApiLoad});
 }
 
@@ -57,8 +55,7 @@ async function createPicker()
                             .setIncludeFolders(true)
                             .setOwnedByMe(true)
                             .setMode(google.picker.DocsViewMode.LIST);
-    // oauthToken = await getToken();
-    // console.log("Picker has token: " + JSON.stringify(oauthToken));
+
     if (pickerApiLoaded && oauthToken)
     {
         var picker = new google.picker.PickerBuilder()
@@ -69,9 +66,6 @@ async function createPicker()
         .setTitle("Open File")
         .addView(markdown_view)
         .addView(all_files_view)
-        // .addView(new google.picker.DocsUploadView().setIncludeFolders(true))
-        
-        // .addView(new DocsView(ViewId.DOCUMENTS))
         .setDeveloperKey(developerKey)
         .setCallback(pickerCallback)
         .build();
@@ -83,7 +77,6 @@ async function createPicker()
 function createNewFilePicker()
 {
     var folder_view = new google.picker
-                            // .View(google.picker.ViewId.FOLDERS, google.picker.DocsViewMode.LIST);
                             .DocsView()
                             .setIncludeFolders(true)
                             .setSelectFolderEnabled(true);
@@ -111,10 +104,7 @@ function pickerCallback(data)
 {
     if (data.action == google.picker.Action.PICKED) {
         var fileId = data.docs[0].id;
-        // window.location.replace('http://localhost:8080/editor?fileId=' + fileId);
-        // window.location.replace('https://marknote.ue.r.appspot.com/editor?fileId=' + fileId);
         window.location.replace('<%=GLOBAL_ROOT%>/editor?fileId=' + fileId);
-        // alert('The user selected: ' + fileId);
     }
 }
 

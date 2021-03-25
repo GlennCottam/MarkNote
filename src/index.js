@@ -136,69 +136,74 @@ app.use(session({
 // On every request, do this:
 app.use(async function(req, res, next)
 {
+    // Checks for user data (is user logged in?)
     if(req.session.user)
     {
+        // If user is logged in, check if token is expired:
         logger.debug("User session exists, testing to see if token needs to be refreshed.");
-        var saved_user = await userStore.getData(req.session.user.id);
-        // logger.debug("User data pulled.");
+        // Generate new timestamp
         var now = Date.now();
-        // logger.info("Current Timestamp: " + now)
+        var timestamp = req.session.user.tokens.tokens.expiry_date;
 
-        // do it before 5 mins
-        if(saved_user.expiry <= now + 300000)
+        logger.info("Time till refresh: " + (timestamp - now) + "ms");
+        // Checks if the token needs to be refreshed, 5 mins before.
+        if(timestamp <= now + 300000)
         {
             logger.warning("Token needs to be refreshed, attempting to do so now.");
-            // logger.info("saved_user.refresh_token: " + saved_user.refresh_token);
 
-            // Refresh Token!
+            // Poll database for user, and get refresh token
+            var saved_user = await userStore.getData(req.session.user.id);
+            // pass token, and request handler to getTokenWithRefresh function
             await getTokenWithRefresh(saved_user.refresh_token, req);
         }
         else
         {
+            // If not logged in:
             logger.dim("User token still active, no need to refresh.");
-            oauth2Client.setCredentials({
-                refresh_token: saved_user.refresh_token,
-                access_token: saved_user.access_token
-            });
-
-            req.session.user.tokens.tokens.refresh_token = saved_user.refresh_token;
-            req.session.user.tokens.tokens.access_token = saved_user.access_token;
-
-            // logger.debug("{every request} New Session Data: " + JSON.stringify(req.session.user));
-            
+            // Set default tokens
+            oauth2Client.setCredentials(req.session.user.tokens.tokens);
         }
-
     }
 
     logger.info("REQUEST: " + req.url);
     next();
 });
 
+/*
+    FUNCTION: getTokenWithRefresh(refresh_token, request)
+        Refresh token is used to grab a new access token
+        and then set to the users session.
+*/
 async function getTokenWithRefresh(refresh_token, request)
 {
     new Promise(async function(resolve)
     {
+        // Sets refresh token just in case its not already
         oauth2Client.setCredentials({
             refresh_token: refresh_token
         });
     
+        // Google API method to get a new access token
         await oauth2Client.refreshAccessToken( function(err, tokens)
         {
+            // On error
             if(err) 
             { 
                 logger.error("Error grabbing new Access Token: " + err);
                 resolve(null);
             }
+            // If not error:
             else
             {
-                // logger.debug("New Tokens: " + JSON.stringify(tokens));
+                // Tokens get set to oAuth2 client
                 oauth2Client.setCredentials(tokens);
-
+                // Store new tokens to database
                 userStore.saveUser(request.session.user.id, tokens.access_token, refresh_token, tokens.expiry_date);
+                // Set session tokens
                 request.session.user.tokens.tokens.access_token = tokens.access_token;
                 request.session.user.tokens.tokens.refresh_token = tokens.refresh_token;
-                oauth2Client.setCredentials(tokens);
-                // logger.debug("New Session Tokens Set" + JSON.stringify(request.session.user.tokens));
+                request.session.user.tokens.tokens.expiry_date = tokens.expiry_date;
+                // Return tokens
                 resolve(tokens);
             }
         });
@@ -257,6 +262,7 @@ app.get('/oauth2callback', async function(req, res)
         
     }
 
+    // Prepars data in JSON
     var user_data = 
     {
         id: user_id,
@@ -264,10 +270,10 @@ app.get('/oauth2callback', async function(req, res)
         profile: user.data
     };
 
+    // Sends data to session
     req.session.user = user_data;
 
     res.redirect('/');
-
 });
 
 // Endpoint: '/token': Allows the client to grab the access token
@@ -288,7 +294,6 @@ app.get('/token', function(req, res)
 // Endpoint: '/logout': Allows the user to logout of their account.
 app.get('/logout', function(req, res)
 {
-    // TODO: When logout: de-auth app so they can choose another account
     req.session.destroy(function(err)
     {
         if(err) {throw err};
@@ -306,6 +311,7 @@ app.get('/', function(req, res)
     {
         res.render('index', {GLOBAL_ROOT: _ENV.GLOBAL_ROOT, user: req.session.user});
     }
+    // If not logged in
     else
     {
         res.render('index', {GLOBAL_ROOT: _ENV.GLOBAL_ROOT, user: null});

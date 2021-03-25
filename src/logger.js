@@ -39,7 +39,7 @@ global_methods.startup.splash = function(text)
 
 global_methods.dim = function(text)
 {
-    console.log("[DIM ]".dim + text.dim);
+    console.log("[DIM ]\t".dim + text.dim);
 }
 
 
