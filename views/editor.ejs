@@ -20,29 +20,31 @@
 
         
 
-        <link rel="stylesheet" href="/node_modules/codemirror/lib/codemirror.css">
-        <link rel="stylesheet" href="/node_modules/codemirror/addon/fold/foldgutter.css">
+        <link rel="stylesheet" href="/public/CodeMirror/lib/codemirror.css">
+        <link rel="stylesheet" href="/public/CodeMirror/theme/monokai.css">
+        <link rel="stylesheet" href="/public/CodeMirror/addon/fold/foldgutter.css">
 
-        <script src="/node_modules/codemirror/lib/codemirror.js"></script>
+        <script src="/public/CodeMirror/lib/codemirror.js"></script>
 
-        <script src="/node_modules/codemirror/addon/fold/foldcode.js"></script>
-        <script src="/node_modules/codemirror/addon/fold/foldgutter.js"></script>
-        <script src="/node_modules/codemirror/addon/fold/markdown-fold.js"></script>
+        <script src="/public/CodeMirror/addon/fold/foldcode.js"></script>
+        <script src="/public/CodeMirror/addon/fold/foldgutter.js"></script>
+        <script src="/public/CodeMirror/addon/fold/markdown-fold.js"></script>
 
-        <script src="/node_modules/codemirror/addon/mode/overlay.js"></script>
-        <script src="/node_modules/codemirror/mode/meta.js"></script>
-        <script src="/node_modules/codemirror/mode/markdown/markdown.js"></script>
+        <script src="/public/CodeMirror/addon/mode/overlay.js"></script>
+        <script src="/public/CodeMirror/mode/meta.js"></script>
+        <script src="/public/CodeMirror/mode/markdown/markdown.js"></script>
 
-        <script src="/node_modules/codemirror/mode/xml/xml.js"></script>
-        <script src="/node_modules/codemirror/mode/stex/stex.js"></script>
-        <script src="/node_modules/codemirror/mode/yaml/yaml.js"></script>
+        <script src="/public/CodeMirror/mode/xml/xml.js"></script>
+        <script src="/public/CodeMirror/mode/stex/stex.js"></script>
+        <script src="/public/CodeMirror/mode/yaml/yaml.js"></script>
 
-        <script src="/node_modules/codemirror/mode/javascript/javascript.js"></script>
+        <script src="/public/CodeMirror/mode/javascript/javascript.js"></script>
 
-        <link rel="stylesheet" href="/node_modules/hypermd/mode/hypermd.css">
-        <link rel="stylesheet" href="/node_modules/hypermd/theme/hypermd-light.css">
+        <link rel="stylesheet" href="/public/HyperMD/mode/hypermd.css">
+        <link rel="stylesheet" href="/public/HyperMD/theme/hypermd-light.css">
 
-        <script src="/node_modules/hypermd/ai1.js"></script>
+        <script src="/public/HyperMD/ai1.js"></script>
+        <script src="/public/HyperMD/addon/table-align.js"></script>
 
 
         <!-- Title -->
@@ -138,7 +140,7 @@
 
                 var myTextArea = document.getElementById('editor');
                 editor = HyperMD.fromTextArea(myTextArea, {
-                    hmdModeLoader: "/node_modules/codemirror/"
+                    hmdModeLoader: "/public/CodeMirror/",
                 });
 
                 editor.setSize(null, "100%");
