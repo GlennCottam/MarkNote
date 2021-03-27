@@ -5,22 +5,48 @@
     <head>
         <!-- Viewport -->
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
         <!-- JQuery -->
-        <script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
-        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+        <!-- <script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script> -->
+        <script src="/public/jquery-3.6.0.min.js"></script>
+        
         <!-- Bootstrap -->
-        <script src="bootstrap-5.0.0-beta1-dist/js/bootstrap.min.js"></script>
-        <link rel="stylesheet" href="bootstrap-5.0.0-beta1-dist/css/bootstrap.min.css">
+        <script src="/public/bootstrap-5.0.0-beta1-dist/js/bootstrap.min.js"></script>
+        <link rel="stylesheet" href="/public/bootstrap-5.0.0-beta1-dist/css/bootstrap.min.css">
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
         
         <!-- FontAwesome -->
         <script src="https://kit.fontawesome.com/c0fad50d4f.js" crossorigin="anonymous"></script>
-        <!-- Highlight JS -->
-        <script src="/highlight/highlight.pack.js"></script>
-        <link rel="stylesheet" href="/highlight/tomorrow-night.css">
 
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
-        <script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
         
+
+        <link rel="stylesheet" href="/public/CodeMirror/lib/codemirror.css">
+        <link rel="stylesheet" href="/public/CodeMirror/theme/monokai.css">
+        <link rel="stylesheet" href="/public/CodeMirror/addon/fold/foldgutter.css">
+
+        <script src="/public/CodeMirror/lib/codemirror.js"></script>
+
+        <script src="/public/CodeMirror/addon/fold/foldcode.js"></script>
+        <script src="/public/CodeMirror/addon/fold/foldgutter.js"></script>
+        <script src="/public/CodeMirror/addon/fold/markdown-fold.js"></script>
+
+        <script src="/public/CodeMirror/addon/mode/overlay.js"></script>
+        <script src="/public/CodeMirror/mode/meta.js"></script>
+        <script src="/public/CodeMirror/mode/markdown/markdown.js"></script>
+
+        <script src="/public/CodeMirror/mode/xml/xml.js"></script>
+        <script src="/public/CodeMirror/mode/stex/stex.js"></script>
+        <script src="/public/CodeMirror/mode/yaml/yaml.js"></script>
+
+        <script src="/public/CodeMirror/mode/javascript/javascript.js"></script>
+
+        <link rel="stylesheet" href="/public/HyperMD/mode/hypermd.css">
+        <link rel="stylesheet" href="/public/HyperMD/theme/hypermd-light.css">
+
+        <script src="/public/HyperMD/ai1.js"></script>
+        <script src="/public/HyperMD/addon/table-align.js"></script>
+
+
         <!-- Title -->
         <title>MarkNote | Editor</title>
 
@@ -33,7 +59,8 @@
                 right: 12px;
             }
         </style>
-        <script>
+        <script>          
+            var editor = null;
             const base_url = "<%=GLOBAL_ROOT%>" + "/";
             var toastElList = null;
             var toastList = null;
@@ -77,7 +104,6 @@
                 
             }
             
-            var simplemde;
 
             // Keypress Methods!
             // https://stackoverflow.com/questions/93695/best-cross-browser-method-to-capture-ctrls-with-jquery#14180949
@@ -117,39 +143,40 @@
             $(document).ready(function()
             {
 
+
+                var myTextArea = document.getElementById('editor');
+                editor = HyperMD.fromTextArea(myTextArea, {
+                    hmdModeLoader: "/public/CodeMirror/",
+                });
+
+                editor.setSize(null, "100%");
+                editor.focus();
+
+                // Bootstrap Toasts
                 var option = 
                 {
                     animation: true,
                     autohide: true,
                     delay: 2000,
                 }
+
                 // Toast Initializer
                 toastElList = [].slice.call(document.querySelectorAll('.toast'))
                 toastList = toastElList.map(function (toastEl) {
                     return new bootstrap.Toast(toastEl, option)
-                });
-
-                
+                });         
 
 
                 console.log("ready");
                 
-                simplemde = new SimpleMDE({
-                    element: $("#editor")[0],
-                    spellChecker: false,
-                    renderingConfig: {
-                        singleLineBreaks: false,
-                        codeSyntaxHighlighting: true,
-                    },
-                    tabSize: 4,
-                    styleSelectedText: false
-                });
             });
 
             // Function to save File to GDrive
             // Also changes the name of the file too.
             async function save()
             {
+                var data = editor.getValue();
+
                 var filename = null;
                 var id_FileName = $("#FileName")
                 if(id_FileName.val())
@@ -170,7 +197,7 @@
                     "data": {
                         "fileId": "<%-fileId%>",
                         "fileName": filename,
-                        "data": simplemde.value()
+                        "data": data
                     }
                 }
 
