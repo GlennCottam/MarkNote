@@ -53,22 +53,28 @@
                 $("#toast_warning").attr('hidden', true);
                 $("#toast_danger").attr('hidden', true);
 
+                $(".toast_message").text(data);
+
                 if(type == 'success')
                 {
                     $("#toast_success").attr('hidden', false);
+                    toastList[0].show();
                     
                 }
                 else if(type == 'warning')
                 {
                     $("#toast_warning").attr('hidden', false);
+                    toastList[1].show();
+
                 }
                 else if(type == 'danger')
                 {
                     $("#toast_danger").attr('hidden', false);
+                    toastList[2].show();
                 }
-                $("#toast_message").text(data);
                 
-                toastList[0].show();
+                
+                
             }
             
             var simplemde;
@@ -115,7 +121,7 @@
                 {
                     animation: true,
                     autohide: true,
-                    delay: 4000,
+                    delay: 2000,
                 }
                 // Toast Initializer
                 toastElList = [].slice.call(document.querySelectorAll('.toast'))
@@ -180,7 +186,7 @@
                     }
                     else if(response.saved == false)
                     {
-                        showToast('danger', 'File Failed to save<br>Try logging out and loggin back in.');
+                        showToast('danger', 'File Failed to save! Try logging out and loggin back in.');
                         console.log("ERROR: " + JSON.stringify(response));
                     }
                 });
@@ -197,69 +203,209 @@
     <body>
         <%- include('header') %>
         <!-- TOASTY -->
-        <div class="position-fixed top-0 end-0 p-3" style="z-index: 5">
-            <div id="liveToast" class="toast hide" data-bs-animation="autohide" role="alert" aria-live="assertive" aria-atomic="true">
-                <div class="toast-header">
-                    <span id="toast_success" hidden><i class="fas fa-check-square text-success"></i></span>
-                    <span id="toast_warning" hidden><i class="fas fa-exclamation-triangle text-warning"></i></span>
-                    <span id="toast_danger" hidden><i class="fas fa-times-circle text-danger"></i></span>
-                    <strong class="me-auto">&nbsp;MarkNote Notifier</strong>
-                    <small>just now</small>
-                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        <div class="toast-container position-fixed w-100 d-flex justify-content-center" style="z-index: 2000;">
+            <div hidden id="toast_success" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body text-white">
+                        <i class="fas fa-check-square"></i>
+                        <span class="toast_message"></span>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
                 </div>
-                <div class="toast-body">
-                    <span id="toast_message"></span>
-              </div>
+            </div>
+            <div hidden id="toast_warning" class="toast align-items-center text-white bg-warning border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body text-white">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span class="toast_message"></span>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
+            <div hidden id="toast_danger" class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body text-white">
+                        <i class="fas fa-times-circle"></i>
+                        <span class="toast_message"></span>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
             </div>
         </div>
-        <div class="container pt-2">
+        <div class="container-fluid mt-2">
+            <!-- EDITOR ON LEFT -->
             <div class="row">
-                <div class="col-md">
-                    <a class="btn btn-primary w-100 mb-2" data-bs-toggle="collapse" href="#Shortcuts" role="button" aria-expanded="false" aria-controls="collapseExample">
-                        Toggle Shortcut List
-                    </a>
-                    <div class="collapse mb-2" id="Shortcuts">
-                        <div class="card card-body">
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th scope="col">Shortcut</th>
-                                        <th scope="col">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td><code>ALT / CTRL + S</code></td>
-                                        <td>Save</td>
-                                    </tr>
-                                    <tr>
-                                        <td><code>ALT + N</code></td>
-                                        <td>New File</td>
-                                    </tr>
-                                    <tr>
-                                        <td><code>ALT / CTRL + O</code></td>
-                                        <td>Open File</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                <div class="col-lg-4">
+                    <div class="row">
+                        <div class="input-group p-2">
+                            <span class="input-group-text">Filename</span>
+                            <input id="FileName" type="text" class="form-control" placeholder="<%=filemetadata.data.name%>">
+                            <button onclick="save();" class="btn btn-primary" type="button">Rename</button>
+                        </div>
+                    </div>
+                    <div class="row p-2">
+                        <a class="btn btn-primary w-100" data-bs-toggle="collapse" href="#Shortcuts" role="button" aria-expanded="false" aria-controls="collapseExample">
+                            Toggle Shortcut List
+                        </a>
+                        <div class="collapse mb-2" id="Shortcuts">
+                            <div class="card card-body">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Shortcut</th>
+                                            <th scope="col">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><code>ALT / CTRL + S</code></td>
+                                            <td>Save</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>ALT + N</code></td>
+                                            <td>New File</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>ALT / CTRL + O</code></td>
+                                            <td>Open File</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row p-2">
+                        <a class="btn btn-primary w-100" data-bs-toggle="collapse" href="#CheatSheet" role="button" aria-expanded="false" aria-controls="collapseExample">
+                            Toggle Markdown Cheatsheet
+                        </a>
+                        <div class="collapse mb-2" id="CheatSheet">
+                            <div class="card card-body">
+                                <table class="table table-bordered">
+                                    <thead class="thead-light">
+                                      <tr>
+                                        <th>Element</th>
+                                        <th>Markdown Syntax</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      <tr>
+                                        <td>Heading</td>
+                                        <td><code># H1<br>
+                                            ## H2<br>
+                                            ### H3</code></td>
+                                      </tr>
+                                      <tr>
+                                        <td>Bold</td>
+                                        <td><code>**bold text**</code></td>
+                                      </tr>
+                                      <tr>
+                                        <td>Italic</td>
+                                        <td><code>*italicized text*</code></td>
+                                      </tr>
+                                      <tr>
+                                        <td>Blockquote</td>
+                                        <td><code>&gt; blockquote</code></td>
+                                      </tr>
+                                      <tr>
+                                        <td>Ordered List</td>
+                                        <td><code>
+                                          1. First item<br>
+                                          2. Second item<br>
+                                          3. Third item<br>
+                                        </code></td>
+                                      </tr>
+                                      <tr>
+                                        <td>Unordered List</td>
+                                        <td>
+                                          <code>
+                                            - First item<br>
+                                            - Second item<br>
+                                            - Third item<br>
+                                          </code>
+                                        </td>
+                                      </tr>
+                                      <tr>
+                                        <td>Code</td>
+                                        <td><code>`code`</code></td>
+                                      </tr>
+                                      <tr>
+                                        <td>Horizontal Rule</td>
+                                        <td><code>---</code></td>
+                                      </tr>
+                                      <tr>
+                                        <td>Link</td>
+                                        <td><code>[title](https://www.example.com)</code></td>
+                                      </tr>
+                                      <tr>
+                                        <td>Image</td>
+                                        <td><code>![alt text](image.jpg)</code></td>
+                                      </tr>
+                                      <tr>
+                                        <td>Table</td>
+                                        <td><code>
+                                            | Syntax      | Description |<br>
+                                            | ----------- | ----------- |<br>
+                                            | Header      | Title       |<br>
+                                            | Paragraph   | Text        |
+                                        </code></td>
+                                      </tr>
+                                      <tr>
+                                        <td>Fenced Code Block</td>
+                                        <td><code>```<br>
+                                        {<br>
+                                        &nbsp;&nbsp;"firstName": "John",<br>
+                                        &nbsp;&nbsp;"lastName": "Smith",<br>
+                                        &nbsp;&nbsp;"age": 25<br>
+                                        }<br>
+                                        ```
+                                        </code></td>
+                                      </tr>
+                                      <tr>
+                                        <td>Footnote</td>
+                                        <td><code>
+                                          Here's a sentence with a footnote. [^1]<br><br>
+                                  
+                                          [^1]: This is the footnote.
+                                        </code></td>
+                                      </tr>
+                                      <tr>
+                                        <td>Heading ID</td>
+                                        <td><code>### My Great Heading {#custom-id}</code></td>
+                                      </tr>
+                                      <tr>
+                                        <td>Definition List</td>
+                                        <td><code>
+                                          term<br>
+                                          : definition
+                                        </code></td>
+                                      </tr>
+                                      <tr>
+                                        <td>Strikethrough</td>
+                                        <td><code>~~The world is flat.~~</code></td>
+                                      </tr>
+                                      <tr>
+                                        <td>Task List</td>
+                                        <td><code>
+                                          - [x] Write the press release<br>
+                                          - [ ] Update the website<br>
+                                          - [ ] Contact the media
+                                        </code></td>
+                                      </tr>
+                                    </tbody>
+                                  </table>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-md">
-                    <div class="input-group mb-2">
-                        <span class="input-group-text">Filename</span>
-                        <input id="FileName" type="text" class="form-control" placeholder="<%=filemetadata.data.name%>">
-                        <button onclick="save();" class="btn btn-primary" type="button">Rename</button>
+                <div class="col-lg">
+                    <textarea id="editor" class="w-100 codemirror-textarea"><%if(raw){%><%-raw.data%><%}%></textarea>
+                    <div id="save_button">
+                        <button class="btn btn-primary" type="button" onclick="save();">
+                            <i class="fab fa-google-drive"></i> &nbsp; Save &nbsp; <span id="save_spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" hidden></span>
+                        </button>
                     </div>
                 </div>
             </div>
-            <textarea id="editor" class="w-100"><%if(raw){%><%-raw.data%><%}%></textarea>
-            <div id="save_button">
-                <button class="btn btn-primary" type="button" onclick="save();">
-                    <i class="fab fa-google-drive"></i> &nbsp; Save &nbsp; <span id="save_spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" hidden></span>
-                </button>
-            </div>
-            
         </div>
         <%- include('footer') %>
     </body>

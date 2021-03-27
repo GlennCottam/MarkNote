@@ -6,7 +6,7 @@
 
     V 0.0.1
 */
-const config = require('../config/global');
+const config = require('../config/global.js');
 const logger = require('./logger');
 
 logger.startup.splash(
@@ -20,6 +20,7 @@ logger.startup.splash(
 );
 
 
+logger.debug("GLOBAL CONFIG: " + JSON.stringify(config));
 logger.startup("Setting Environment Variables");
 const _ENV = process.env;
 _ENV.IS_PRODUCTION = config.server.production;

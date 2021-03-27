@@ -1,119 +1,126 @@
-<style>
-    .picker
+<picker>
+    <style>
+        .picker
+        {
+            z-index: 2001;
+            /* margin-top: 28px; */
+            height: 100% !important;
+            width: 100% !important;
+            top: 0px !important;
+        }
+
+        .picker-dialog-bg
+        {
+            opacity: 0 !important;
+        }
+    </style>
+
+    <script type="text/javascript">
+
+    // The Browser API key obtained from the Google API Console.
+    // Replace with your own Browser API key, or your own key.
+    var developerKey = 'AIzaSyADlVRCc63M-zJ64t--JuJkkPhrQIf3eEA';
+
+    // The Client ID obtained from the Google API Console. Replace with your own Client ID.
+
+    // Replace with your own project number from console.developers.google.com.
+    // See "Project number" under "IAM & Admin" > "Settings"
+    var appId = "marknote";
+
+    // Scope to use to access user's Drive items.
+    var scope = ['https://www.googleapis.com/auth/drive.file'];
+
+    var pickerApiLoaded = false;
+    var oauthToken = null;
+
+    // Use the Google API Loader script to load the google.picker script.
+    function loadPicker() {
+    gapi.load('picker', {'callback': onPickerApiLoad});
+    }
+
+    async function getToken()
     {
-        margin-top: 12px;
-        height: 95% !important;
-        width: 95% !important;
-        top: 0 !important;
+        var access_token = await $.get("<%=GLOBAL_ROOT%>/token");
+        console.log("Access Token : " + JSON.stringify(access_token));
+        return access_token;
     }
-</style>
 
-<script type="text/javascript">
+    function onPickerApiLoad() {
+        pickerApiLoaded = true;
+    }
 
-// The Browser API key obtained from the Google API Console.
-// Replace with your own Browser API key, or your own key.
-var developerKey = 'AIzaSyADlVRCc63M-zJ64t--JuJkkPhrQIf3eEA';
-
-// The Client ID obtained from the Google API Console. Replace with your own Client ID.
-
-// Replace with your own project number from console.developers.google.com.
-// See "Project number" under "IAM & Admin" > "Settings"
-var appId = "marknote";
-
-// Scope to use to access user's Drive items.
-var scope = ['https://www.googleapis.com/auth/drive.file'];
-
-var pickerApiLoaded = false;
-var oauthToken = null;
-
-// Use the Google API Loader script to load the google.picker script.
-function loadPicker() {
-gapi.load('picker', {'callback': onPickerApiLoad});
-}
-
-async function getToken()
-{
-    var access_token = await $.get("<%=GLOBAL_ROOT%>/token");
-    console.log("Access Token : " + JSON.stringify(access_token));
-    return access_token;
-}
-
-function onPickerApiLoad() {
-    pickerApiLoaded = true;
-}
-
-// Create and render a Picker object for searching images.
-async function createPicker() 
-{
-    oauthToken = await $.get("<%=GLOBAL_ROOT%>/token");
-    var markdown_view = new google.picker
-                            .View(google.picker.ViewId.DOCS, google.picker.DocsViewMode.LIST)
-                            .setMimeTypes('text/markdown');
-
-    var all_files_view = new google.picker
-                            .DocsView()
-                            .setIncludeFolders(true)
-                            .setOwnedByMe(true)
-                            .setMode(google.picker.DocsViewMode.LIST);
-
-    if (pickerApiLoaded && oauthToken)
+    // Create and render a Picker object for searching images.
+    async function createPicker() 
     {
-        var picker = new google.picker.PickerBuilder()
-        .setSelectableMimeTypes('text/markdown')
-        
-        .setAppId(appId)
-        .setOAuthToken(oauthToken)
-        .setTitle("Open File")
-        .addView(markdown_view)
-        .addView(all_files_view)
-        .setDeveloperKey(developerKey)
-        .setCallback(pickerCallback)
-        .build();
+        oauthToken = await $.get("<%=GLOBAL_ROOT%>/token");
+        var markdown_view = new google.picker
+                                .View(google.picker.ViewId.DOCS, google.picker.DocsViewMode.LIST)
+                                .setMimeTypes('text/markdown');
 
-        picker.setVisible(true);
+        var all_files_view = new google.picker
+                                .DocsView()
+                                .setIncludeFolders(true)
+                                .setOwnedByMe(true)
+                                .setMode(google.picker.DocsViewMode.LIST);
+
+        if (pickerApiLoaded && oauthToken)
+        {
+            var picker = new google.picker.PickerBuilder()
+            .setSelectableMimeTypes('text/markdown')
+            
+            .setAppId(appId)
+            .setOAuthToken(oauthToken)
+            .setTitle("Open Markdown File")
+            .addView(markdown_view)
+            .addView(all_files_view)
+            .setDeveloperKey(developerKey)
+            .setCallback(pickerCallback)
+            .build();
+
+            picker.setVisible(true);
+        }
     }
-}
 
-function createNewFilePicker()
-{
-    var folder_view = new google.picker
-                            .DocsView()
-                            .setIncludeFolders(true)
-                            .setSelectFolderEnabled(true);
-
-    if (pickerApiLoaded && oauthToken)
+    function createNewFilePicker()
     {
-        
-        var picker = new google.picker.PickerBuilder()
-        .enableFeature(google.picker.Feature.MINE_ONLY)
-        .enableFeature(google.picker.Feature.NAV_HIDDEN)
-        .setAppId(appId)
-        .setOAuthToken(oauthToken)
-        .setTitle("New File")
-        .addView(folder_view)
-        .setDeveloperKey(developerKey)
-        .setCallback(newFilePickerCallback)
-        .build();
+        var folder_view = new google.picker
+                                .DocsView()
+                                .setIncludeFolders(true)
+                                .setSelectFolderEnabled(true);
 
-        picker.setVisible(true);
+        if (pickerApiLoaded && oauthToken)
+        {
+            
+            var picker = new google.picker.PickerBuilder()
+            .enableFeature(google.picker.Feature.MINE_ONLY)
+            .enableFeature(google.picker.Feature.NAV_HIDDEN)
+            .setAppId(appId)
+            .setOAuthToken(oauthToken)
+            .setTitle("New Markdown File")
+            .addView(folder_view)
+            .setDeveloperKey(developerKey)
+            .setCallback(newFilePickerCallback)
+            .build();
+
+            picker.setVisible(true);
+        }
     }
-}
 
-// A simple callback implementation.
-function pickerCallback(data) 
-{
-    if (data.action == google.picker.Action.PICKED) {
-        var fileId = data.docs[0].id;
-        window.location.replace('<%=GLOBAL_ROOT%>/editor?fileId=' + fileId);
+    // A simple callback implementation.
+    function pickerCallback(data) 
+    {
+        if (data.action == google.picker.Action.PICKED) {
+            var fileId = data.docs[0].id;
+            window.location.replace('<%=GLOBAL_ROOT%>/editor?fileId=' + fileId);
+        }
     }
-}
 
-function newFilePickerCallback(data)
-{
-    console.log("You Reached the new file picker callback" + JSON.stringify(data));
-    window.location.replace('<%=GLOBAL_ROOT%>/new?folderId=' + data.docs[0].id);
-}
+    function newFilePickerCallback(data)
+    {
+        console.log("You Reached the new file picker callback" + JSON.stringify(data));
+        window.location.replace('<%=GLOBAL_ROOT%>/new?folderId=' + data.docs[0].id);
+    }
 
-</script>
-<script type="text/javascript" src="https://apis.google.com/js/api.js?onload=loadPicker"></script>
-
+    </script>
+    <script type="text/javascript" src="https://apis.google.com/js/api.js?onload=loadPicker"></script>
+</picker>
