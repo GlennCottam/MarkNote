@@ -5,7 +5,7 @@ module.exports =
         "uri": {
             "local": 
             {
-                "url": "http://localhost",
+                "url": "http://devel.mackwnox.ca",
                 "port": 8080,
             },
             "production": 
