@@ -170,6 +170,16 @@ app.use(async function(req, res, next)
     next();
 });
 
+app.use(function(err, req, res, next)
+{
+    if(err)
+    {
+        logger.error("ERROR HANDLING REQUESTION: " + JSON.stringify(err));
+        res.redirect('/error');
+    }
+    next();
+});
+
 /*
     FUNCTION: getTokenWithRefresh(refresh_token, request)
         Refresh token is used to grab a new access token
