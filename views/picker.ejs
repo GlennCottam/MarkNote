@@ -61,13 +61,13 @@
                                 .DocsView()
                                 .setIncludeFolders(true)
                                 .setOwnedByMe(true)
-                                .setMimeTypes('text/markdown')
                                 .setMode(google.picker.DocsViewMode.LIST);
 
         if (pickerApiLoaded && oauthToken)
         {
             var picker = new google.picker.PickerBuilder()
             .setSelectableMimeTypes('text/markdown')
+            
             .setAppId(appId)
             .setOAuthToken(oauthToken)
             .setTitle("Open Markdown File")
@@ -81,14 +81,10 @@
         }
     }
 
-    async function createNewFilePicker()
+    function createNewFilePicker()
     {
-        oauthToken = await $.get("<%=GLOBAL_ROOT%>/token");
         var folder_view = new google.picker
                                 .DocsView()
-                                .setMimeTypes("application/vnd.google-apps.folder")
-                                .setMode(google.picker.DocsViewMode.LIST)
-                                .setOwnedByMe(true)
                                 .setIncludeFolders(true)
                                 .setSelectFolderEnabled(true);
 
@@ -96,6 +92,8 @@
         {
             
             var picker = new google.picker.PickerBuilder()
+            .enableFeature(google.picker.Feature.MINE_ONLY)
+            .enableFeature(google.picker.Feature.NAV_HIDDEN)
             .setAppId(appId)
             .setOAuthToken(oauthToken)
             .setTitle("New Markdown File")

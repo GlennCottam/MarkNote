@@ -9,8 +9,7 @@
     "gcloud_test": "node src/test_gcloud_auth.js",
     "start": "node src/index.js",
     "create": "gcloud app create",
-    "deploy": "gcloud app deploy --no-promote",
-    "scss": "node-sass sass/main.scss -o public/"
+    "deploy": "gcloud app deploy --no-promote"
   },
   "keywords": [
     "\"Google",
@@ -23,13 +22,11 @@
   "license": "AGPL-3.0",
   "devDependencies": {
     "@google-cloud/storage": "^5.8.2",
-    "nodemon": "^2.0.7",
-    "node-sass": "^5.0.0"
+    "nodemon": "^2.0.7"
   },
   "dependencies": {
     "@google-cloud/connect-datastore": "^5.0.2",
     "@google-cloud/datastore": "^6.3.1",
-    "bootstrap": "^5.0.0-beta3",
     "colors": "^1.4.0",
     "cors": "^2.8.5",
     "ejs": "^3.1.5",
