@@ -42,6 +42,31 @@ global_methods.dim = function(text)
     console.log("[DIM ]\t".dim + text.dim);
 }
 
+global_methods.session = class session
+{
+    constructor(url, session_data)
+    {
+        var token_refresh;
+        if(session_data.tokenrefresh)
+        {
+            token_refresh = "true".green
+        }
+        else
+        {
+            token_refresh = "false".orange
+        }
+
+        this.data = 
+        "REQUEST: ".green + url.cyan + 
+        " SESSION: ".green + 
+        "LOGGED IN: " + session_data.loggedin + 
+        " TIMESTAMP: " + session_data.expiry +
+        " TOKENREFRESH: " + token_refresh;
+
+        console.log(this.data);
+    }
+}
+
 
 
 module.exports = global_methods;

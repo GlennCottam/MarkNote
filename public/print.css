@@ -1,46 +1,5 @@
 @media print
 {
-    /* @page
-    {
-        margin: 2cm;
-    } */
-
-    /* .HyperMD-header-1
-    {
-        page-break-after: avoid;
-        page-break-inside: avoid;
-        page-break-before: initial;
-    }
-
-    p
-    {
-        page-break-inside: avoid;
-    }
-
-    */
-
-
-    /* .CodeMirror-lines
-    {
-        position: absolute !important;
-        top: 0px !important;
-        left: 0px !important;
-        width: 100% !important;
-        z-index: 9999 !important;
-
-        background-color: #FFFFFF !important;
-    } */
-
-    /*
-
-    .CodeMirror-code
-    {
-        background-color: #FFFFFF !important;
-    } 
-    
-    */
-
-
     .CodeMirror-gutter, 
     .CodeMirror-gutters, 
     .CodeMirror-gutter-wrapper, 
@@ -70,10 +29,8 @@
 
     img
     {
-        width: 95% !important;
+        max-width: 95% !important;
         margin: 4px !important;
-        /* margin: 2cm !important; */
     }
-
 }
 

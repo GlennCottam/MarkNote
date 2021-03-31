@@ -20,7 +20,6 @@ logger.startup.splash(
 );
 
 
-logger.debug("GLOBAL CONFIG: " + JSON.stringify(config));
 logger.startup("Setting Environment Variables");
 const _ENV = process.env;
 _ENV.IS_PRODUCTION = config.server.production;
@@ -56,9 +55,8 @@ const session = require('express-session');
 console.log("\tImporting: Cors");
 const Cors = require('cors');
 
-// Importing File System API
-console.log("\tImporting: fs");
-const File_system = require('fs');
+console.log("\tImporting: body-parser");
+const BodyParser = require('body-parser');
 
 // Setting Global Values
 const keys = require('../secure/keys');
@@ -112,6 +110,8 @@ logger.success("Import Complete.");
         Below are the URL access points the server will listen for.
 */
 // Setting up the server with frameworks
+// TODO: Change BODYPARSER to something else as its old and not used anymore
+app.use(BodyParser.urlencoded({extended: true, limit: '1gb'}));                     // LARGE FILE FIX
 app.use('/public', Express.static('public'));
 app.use(Cors());        
 app.enable('trust proxy');                                                        // Sets Cors Policy
@@ -137,20 +137,24 @@ app.use(session({
 // On every request, do this:
 app.use(async function(req, res, next)
 {
+    var logdata = {};
     // Checks for user data (is user logged in?)
     if(req.session.user)
     {
         // If user is logged in, check if token is expired:
         logger.debug("User session exists, testing to see if token needs to be refreshed.");
+        logdata.loggedin = true;
         // Generate new timestamp
         var now = Date.now();
         var timestamp = req.session.user.tokens.tokens.expiry_date;
 
         logger.info("Time till refresh: " + (timestamp - now) + "ms");
+        logdata.expiry = timestamp - now;
         // Checks if the token needs to be refreshed, 5 mins before.
         if(timestamp <= now + 300000)
         {
             logger.warning("Token needs to be refreshed, attempting to do so now.");
+            logdata.tokenrefresh = true;
 
             // Poll database for user, and get refresh token
             var saved_user = await userStore.getData(req.session.user.id);
@@ -161,12 +165,14 @@ app.use(async function(req, res, next)
         {
             // If not logged in:
             logger.dim("User token still active, no need to refresh.");
+            logdata.tokenrefresh = false;
             // Set default tokens
             oauth2Client.setCredentials(req.session.user.tokens.tokens);
         }
     }
 
-    logger.info("REQUEST: " + req.url);
+    // new logger.session(req.url, logdata);
+    logger.info("REQUEST: " + req.url + " SESSION: " + JSON.stringify(logdata));
     next();
 });
 
@@ -385,12 +391,17 @@ app.get('/editor', async function(req, res)
     }
 });
 
-
-
+// Endpoint: '/save': Used to save files to Google Drive
 app.post('/save', async function(req, res)
 {
+    function finish(data)
+    {
+        res.json(data);
+        res.end();
+    }
+
     logger.info("FILEDATA: \tFILENAME: " + req.body.fileName);
-    var file = await drive.files.update({
+    await drive.files.update({
         fileId: req.body.fileId,
         resource:
         {
@@ -412,14 +423,6 @@ app.post('/save', async function(req, res)
             finish({saved: true, data: res.data});
         }
     });
-
-    function finish(data)
-    {
-        res.json(data);
-        res.end();
-    }
-
-    
 });
 
 // Error Page
@@ -428,6 +431,7 @@ app.get('/error', function(req, res)
     res.render('error', {GLOBAL_ROOT: _ENV.GLOBAL_ROOT,});
 });
 
+// Process on Error will redirect to error page
 app.on('error', function(req, res)
 {
     res.redirect('/error');
