@@ -35,7 +35,7 @@
 
     // Use the Google API Loader script to load the google.picker script.
     function loadPicker() {
-    gapi.load('picker', {'callback': onPickerApiLoad});
+        gapi.load('picker', {'callback': onPickerApiLoad});
     }
 
     async function getToken()
@@ -81,8 +81,9 @@
         }
     }
 
-    function createNewFilePicker()
+    async function createNewFilePicker()
     {
+        oauthToken = await $.get("<%=GLOBAL_ROOT%>/token");
         var folder_view = new google.picker
                                 .DocsView()
                                 .setIncludeFolders(true)

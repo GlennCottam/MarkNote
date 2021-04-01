@@ -9,7 +9,7 @@
     "gcloud_test": "node src/test_gcloud_auth.js",
     "start": "node src/index.js",
     "create": "gcloud app create",
-    "deploy": "gcloud app deploy --no-promote"
+    "deploy": "gcloud app deploy"
   },
   "keywords": [
     "\"Google",

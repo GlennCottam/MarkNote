@@ -1,3 +1,6 @@
+<% if(user) {%>
+    <%- include('picker') %>
+<%}%>
 <header class="container-fluid sticky-top noPrint">
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary rounded-bottom">
         <div class="container-fluid">
@@ -30,6 +33,9 @@
     
                     <% } else { %>
                         <li class="nav-item m-1">
+                            <button class="btn btn-dark w-100" onclick="window.open('/demo', '_parent')"><i class="fas fa-laptop-code"></i>&nbsp;Demo</button>
+                        </li>
+                        <li class="nav-item m-1">
                             <button class="w-100 btn bg-success text-white" onclick="window.open('/login', '_parent')"><i class="fas fa-sign-in-alt"></i>&nbsp;Login</button>
                         </li>
                     <% }%>
@@ -38,6 +44,3 @@
         </div>
     </nav>
 </header>
-<% if(user) {%>
-    <%- include('picker') %>
-<%}%>

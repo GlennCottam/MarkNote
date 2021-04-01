@@ -47,7 +47,7 @@
         <script src="/public/HyperMD/addon/table-align.js"></script>
 
         <!-- Title -->
-        <title>MarkNote | Editor</title>
+        <title>MarkNote | Demo</title>
 
         <style>
             #save_button
@@ -58,92 +58,83 @@
                 right: 12px;
             }
         </style>
-        <script>          
-            var editor = null;
-            const base_url = "<%=GLOBAL_ROOT%>" + "/";
-            var toastElList = null;
-            var toastList = null;
-            
-            
-            
-
-            // Autosave Functionality (saves every 1 min)
-            setInterval(function()
+        <script>
+            function createNewFilePicker()
             {
-                console.log("Autosaving");
-                save();
-            }, 60 * 1000);
-
-            async function showToast(type, data)
-            {
-                // Reset all
-                $("#toast_success").attr('hidden', true);
-                $("#toast_warning").attr('hidden', true);
-                $("#toast_danger").attr('hidden', true);
-
-                $(".toast_message").text(data);
-
-                if(type == 'success')
-                {
-                    $("#toast_success").attr('hidden', false);
-                    toastList[0].show();
-                    
-                }
-                else if(type == 'warning')
-                {
-                    $("#toast_warning").attr('hidden', false);
-                    toastList[1].show();
-
-                }
-                else if(type == 'danger')
-                {
-                    $("#toast_danger").attr('hidden', false);
-                    toastList[2].show();
-                }
-                
-                
-                
+                alert('New File creation disabled.');
             }
-            
-
-            // Keypress Methods!
-            // https://stackoverflow.com/questions/93695/best-cross-browser-method-to-capture-ctrls-with-jquery#14180949
-            $(window).bind('keydown', function(event) {
-                if (event.ctrlKey || event.metaKey) {
-                    switch (String.fromCharCode(event.which).toLowerCase()) {
-                    case 's':
-                        event.preventDefault();
-                        save();
-                        break;
-                    case 'f':
-                        event.preventDefault();
-                        break;
-                    case 'o':
-                        event.preventDefault();
-                        createPicker();
-                        break;
-                    case 'g':
-                        event.preventDefault();
-                        break;
-                    }
-                }
-                if(event.altKey && String.fromCharCode(event.which).toLowerCase() == 'n')
-                {
-                    createNewFilePicker();
-                }
-                if(event.altKey && String.fromCharCode(event.which).toLowerCase() == 's')
-                {
-                    save();
-                }
-                if(event.altKey && String.fromCharCode(event.which).toLowerCase() == 'o')
-                {
-                    createPicker();
-                }
-            });
+            function createPicker()
+            {
+                alert('File Opening disabled.');
+            }
 
             $(document).ready(function()
             {
-                var is_chrome = function() { return Boolean(window.chrome);};
+                async function showToast(type, data)
+                {
+                    // Reset all
+                    $("#toast_success").attr('hidden', true);
+                    $("#toast_warning").attr('hidden', true);
+                    $("#toast_danger").attr('hidden', true);
+
+                    $(".toast_message").text(data);
+
+                    if(type == 'success')
+                    {
+                        $("#toast_success").attr('hidden', false);
+                        toastList[0].show();
+                        
+                    }
+                    else if(type == 'warning')
+                    {
+                        $("#toast_warning").attr('hidden', false);
+                        toastList[1].show();
+
+                    }
+                    else if(type == 'danger')
+                    {
+                        $("#toast_danger").attr('hidden', false);
+                        toastList[2].show();
+                    }
+                    
+                    
+                    
+                }
+                $(window).bind('keydown', function(event) 
+                {
+                    if (event.ctrlKey || event.metaKey) {
+                        switch (String.fromCharCode(event.which).toLowerCase()) {
+                        case 's':
+                            event.preventDefault();
+                            save();
+                            break;
+                        case 'f':
+                            event.preventDefault();
+                            break;
+                        case 'o':
+                            event.preventDefault();
+                            createPicker();
+                            break;
+                        case 'g':
+                            event.preventDefault();
+                            break;
+                        }
+                    }
+                    if(event.altKey && String.fromCharCode(event.which).toLowerCase() == 'n')
+                    {
+                        createNewFilePicker();
+                    }
+                    if(event.altKey && String.fromCharCode(event.which).toLowerCase() == 's')
+                    {
+                        save();
+                    }
+                    if(event.altKey && String.fromCharCode(event.which).toLowerCase() == 'o')
+                    {
+                        createPicker();
+                    }
+                });
+
+                
 
                 function print()
                 {
@@ -157,6 +148,11 @@
                         window.print();
                         window.close();
                     }
+                }
+
+                function save()
+                {
+                    alert("Saving is disabled");
                 }
 
                 var myTextArea = document.getElementById('editor');
@@ -179,71 +175,29 @@
                 toastElList = [].slice.call(document.querySelectorAll('.toast'))
                 toastList = toastElList.map(function (toastEl) {
                     return new bootstrap.Toast(toastEl, option)
-                });         
+                });   
 
-
-                console.log("ready");
-                
             });
-
-            // Function to save File to GDrive
-            // Also changes the name of the file too.
-            async function save()
-            {
-                var data = editor.getValue();
-
-                var filename = null;
-                var id_FileName = $("#FileName")
-                if(id_FileName.val())
-                {
-                    // Replace with new filename
-                    filename = id_FileName.val();
-                }
-                else
-                {
-                    filename = id_FileName.attr('placeholder');
-                }
-
-                // Setup for Ajax
-                var settings = {
-                    "url": base_url + "save",
-                    "method": "POST",
-                    "timeout": 0,
-                    "data": {
-                        "fileId": "<%-fileId%>",
-                        "fileName": filename,
-                        "data": data
-                    }
-                }
-
-                // Start spinner
-                $("#save_spinner").attr('hidden', false);
-                $("#save_button").attr('disabled', true);
-                // Save the File
-                await $.ajax(settings).done(function(response)
-                {
-                    if(response.saved == true)
-                    {
-                        showToast('success', 'File Saved Successfully!');
-                    }
-                    else if(response.saved == false)
-                    {
-                        showToast('danger', 'File Failed to save! Try logging out and loggin back in.');
-                        console.log("ERROR: " + JSON.stringify(response));
-                    }
-                });
-                // Stop Spinner
-                $("#save_spinner").attr('hidden', true);
-                $("#save_button").attr('disabled', false);
-                $("#FileName").attr('placeholder', filename);
-                $("#FileName").val('');
-            }
-
         </script>
-
     </head>
     <body>
-        <%- include('header') %>
+        <header class="container-fluid sticky-top noPrint">
+            <nav class="navbar navbar-expand-lg navbar-dark bg-primary rounded-bottom">
+                <div class="container-fluid">
+                    <a href="/" class="navbar-brand"><i class="fas fa-home"></i>&nbsp;MarkNote (Demo)</a>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle Navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse justify-content-end" id="navbarSupportedContent">
+                        <ul class="navbar-nav mb-2 mb-lg-0">
+                            <li class="nav-item m-1">
+                                <button class="btn btn-dark w-100" onclick="window.open('https://github.com/GlennCottam/MarkNote', 'blank')"><i class="fab fa-github"></i>&nbsp;View On Github</button>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+        </header>
         <!-- TOASTY -->
         <div class="noPrint toast-container position-fixed w-100 d-flex justify-content-center" style="z-index: 2000;">
             <div hidden id="toast_success" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
@@ -281,7 +235,7 @@
                     <div class="row">
                         <div class="input-group p-2">
                             <span class="input-group-text">Filename</span>
-                            <input id="FileName" type="text" class="form-control" placeholder="<%=filemetadata.data.name%>">
+                            <input id="FileName" type="text" class="form-control" placeholder="Demo.md">
                             <button onclick="save();" class="btn btn-primary" type="button">Rename</button>
                             
                         </div>
@@ -449,7 +403,7 @@
                 </div>
                 <!-- EDITOR -->
                 <div class="col-lg">
-                    <textarea id="editor" media="print" class="w-100 codemirror-textarea"><%if(raw){%><%-raw.data%><%}%></textarea>
+                    <textarea id="editor" media="print" class="w-100 codemirror-textarea"><%-demo_file%></textarea>
                     <div class="noPrint" id="save_button">
                         <button class="btn btn-primary" type="button" onclick="save();">
                             <i class="fab fa-google-drive"></i> &nbsp; Save &nbsp; <span id="save_spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" hidden></span>

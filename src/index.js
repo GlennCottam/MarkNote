@@ -19,6 +19,8 @@ logger.startup.splash(
     "---------------------------------"
 );
 
+// 103741523908151779324
+
 
 logger.startup("Setting Environment Variables");
 const _ENV = process.env;
@@ -57,6 +59,9 @@ const Cors = require('cors');
 
 console.log("\tImporting: body-parser");
 const BodyParser = require('body-parser');
+
+console.log("\tImporting: FS");
+const FS = require('fs');
 
 // Setting Global Values
 const keys = require('../secure/keys');
@@ -189,14 +194,20 @@ async function getTokenWithRefresh(refresh_token, request)
         oauth2Client.setCredentials({
             refresh_token: refresh_token
         });
+
+        logger.debug("REFRESH TOKEN: " + refresh_token);
+
+        
     
         // Google API method to get a new access token
         await oauth2Client.refreshAccessToken( function(err, tokens)
         {
+            
             // On error
             if(err) 
             { 
                 logger.error("Error grabbing new Access Token: " + err);
+                logger.debug("TOKENS: " + JSON.stringify(tokens));
                 resolve(null);
             }
             // If not error:
@@ -423,6 +434,13 @@ app.post('/save', async function(req, res)
             finish({saved: true, data: res.data});
         }
     });
+});
+
+
+app.get('/demo', function(req, res)
+{
+    var demo_file = FS.readFileSync('assets/demo.md');
+    res.render('demo', {demo_file});
 });
 
 // Error Page
