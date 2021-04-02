@@ -1,10 +1,17 @@
 <% if(user) {%>
     <%- include('picker') %>
 <%}%>
+<style>
+    #logo
+    {
+        width: 25px;
+    }
+</style>
 <header class="container-fluid sticky-top noPrint">
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary rounded-bottom">
         <div class="container-fluid">
             <a href="/" class="navbar-brand"><i class="fas fa-home"></i>&nbsp;MarkNote</a>
+            <!-- <a href="/" class="navbar-brand"><img id="logo" src="public/icons/1x/Artboard 1.png" class="img float-start">&nbsp;MarkNote</a> -->
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle Navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>

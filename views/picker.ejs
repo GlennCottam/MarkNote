@@ -41,7 +41,6 @@
     async function getToken()
     {
         var access_token = await $.get("<%=GLOBAL_ROOT%>/token");
-        console.log("Access Token : " + JSON.stringify(access_token));
         return access_token;
     }
 

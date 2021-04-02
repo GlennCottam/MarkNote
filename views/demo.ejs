@@ -50,6 +50,10 @@
         <title>MarkNote | Demo</title>
 
         <style>
+            #logo
+            {
+                width: 25px;
+            }
             #save_button
             {
                 z-index: 2;
@@ -59,14 +63,7 @@
             }
         </style>
         <script>
-            function createNewFilePicker()
-            {
-                alert('New File creation disabled.');
-            }
-            function createPicker()
-            {
-                alert('File Opening disabled.');
-            }
+            
 
             $(document).ready(function()
             {
@@ -134,7 +131,14 @@
                     }
                 });
 
-                
+                window.createNewFilePicker = function()
+                {
+                    showToast('warning', 'Creating a New File Is Disabled in Demo Mode');
+                }
+                window.createPicker = function()
+                {
+                    showToast('warning', 'Opening a File in Demo Mode is Disabled');
+                }
 
                 function print()
                 {
@@ -150,9 +154,9 @@
                     }
                 }
 
-                function save()
+                window.save = function()
                 {
-                    alert("Saving is disabled");
+                    showToast('warning', 'Saving is Disabled in Demo Mode');
                 }
 
                 var myTextArea = document.getElementById('editor');
@@ -192,6 +196,9 @@
                         <ul class="navbar-nav mb-2 mb-lg-0">
                             <li class="nav-item m-1">
                                 <button class="btn btn-dark w-100" onclick="window.open('https://github.com/GlennCottam/MarkNote', 'blank')"><i class="fab fa-github"></i>&nbsp;View On Github</button>
+                            </li>
+                            <li class="nav-item m-1">
+                                <button class="w-100 btn bg-success text-white" onclick="window.open('/login', '_parent')"><i class="fas fa-sign-in-alt"></i>&nbsp;Login</button>
                             </li>
                         </ul>
                     </div>

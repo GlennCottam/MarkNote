@@ -5,7 +5,7 @@ module.exports =
         "uri": {
             "local": 
             {
-                "url": "http://devel.mackwnox.ca",
+                "url": "https://marknote.mackwnox.ca",
                 "port": 8080,
             },
             "production": 

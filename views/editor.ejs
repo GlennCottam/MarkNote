@@ -64,7 +64,22 @@
             var toastElList = null;
             var toastList = null;
             
-            
+            async function sendClipboard(data)
+            {
+                if($("#KWrapperCheck").is(':checked'))
+                {
+                    console.log("Inserting KaTeX Wrapper");
+                    await navigator.clipboard.writeText("$$\n" + data + "\n$$");
+
+                }
+                else
+                {
+                    await navigator.clipboard.writeText(data);
+
+                }
+
+                showToast('info', 'Copied to Clipboard!') 
+            }
             
 
             // Autosave Functionality (saves every 1 min)
@@ -73,6 +88,7 @@
                 console.log("Autosaving");
                 save();
             }, 60 * 1000);
+
 
             async function showToast(type, data)
             {
@@ -89,22 +105,23 @@
                     toastList[0].show();
                     
                 }
+                else if(type == 'info')
+                {
+                    $('#toast_info').attr('hidden', false);
+                    toastList[1].show();
+                }
                 else if(type == 'warning')
                 {
                     $("#toast_warning").attr('hidden', false);
-                    toastList[1].show();
+                    toastList[2].show();
 
                 }
                 else if(type == 'danger')
                 {
                     $("#toast_danger").attr('hidden', false);
-                    toastList[2].show();
+                    toastList[3].show();
                 }
-                
-                
-                
-            }
-            
+            }           
 
             // Keypress Methods!
             // https://stackoverflow.com/questions/93695/best-cross-browser-method-to-capture-ctrls-with-jquery#14180949
@@ -143,6 +160,8 @@
 
             $(document).ready(function()
             {
+
+
                 var is_chrome = function() { return Boolean(window.chrome);};
 
                 function print()
@@ -255,6 +274,15 @@
                     <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
                 </div>
             </div>
+            <div hidden id="toast_info" class="toast align-items-center text-dark bg-info border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body text-white">
+                        <i class="fas fa-info-circle"></i>
+                        <span class="toast_message"></span>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
             <div hidden id="toast_warning" class="toast align-items-center text-white bg-warning border-0" role="alert" aria-live="assertive" aria-atomic="true">
                 <div class="d-flex">
                     <div class="toast-body text-white">
@@ -274,9 +302,10 @@
                 </div>
             </div>
         </div>
+        <!-- LEFT AND TOP BAR -->
         <div class="container-fluid mt-2">
             <div class="row">
-                <!-- FUNCTIONS AND BUTTONS -->
+                <!-- Function Buttons -->
                 <div class="noPrint col-lg-4">
                     <div class="row">
                         <div class="input-group p-2">
@@ -291,6 +320,89 @@
                             <button  class="btn btn-primary text-white w-100" onclick="print();"><i class="fas fa-print"></i>&nbsp;Print</button>
                             <button class="btn btn-success text-white w-100" onclick="createPicker()"><i class="fas fa-folder-open"></i>&nbsp;Open File</button>
                             <button class="btn btn-success text-white w-100" onclick="createNewFilePicker()"><i class="fas fa-edit""></i>&nbsp;New File</button>
+                        </div>
+                    </div>
+                    <!-- Functions and Math Buttons -->
+                    <div class="row p-2">
+                        <div class="container-fluid p-0 pt-2 border border-dark rounded">
+                            <h4 class="text-center">Math Shortcuts</h4>
+                            <div class="btn-group p-0 w-100">
+                                <a class="btn btn-secondary" data-bs-toggle="collapse" href="#Math_Structures" role="button" aria-expanded="false" aria-controls="multiCollapse">Structures</a>
+                                <a class="btn btn-secondary" data-bs-toggle="collapse" href="#Math_Symbols" role="button" aria-expanded="false" aria-controls="multiCollapse">Symbols</a>
+                                
+                            </div>
+                            <div class="collapse p-2 text-white w-100" id="Math_Structures">
+
+                                <!-- SUPER AND SUBSCRIPTS -->
+                                <a class="btn btn-primary w-100" data-bs-toggle="collapse" href="#Sub_Super_Scripts_Area" role="button" aria-controls="Sub_Super_Scripts_Area">
+                                    Sub and Superscript
+                                </a>
+                                
+                                <div class="collapse w-100" id="Sub_Super_Scripts_Area">
+                                    <!-- SUPERSCRIPT -->
+                                    <button type="button" onclick="sendClipboard('b^e')" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Superscript">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?b%5Ee">
+                                    </button>
+                                    <!-- SUBSCRIPT -->
+                                    <button type="button" onclick="sendClipboard('b_l');" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Subscript" data-copy-text="b_l">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?b_l">
+                                    </button>
+                                    <!-- SUPER AND SUBSCRIPTS -->
+                                    <button type="button" onclick="sendClipboard('b_{l}^{e}');" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Super and Subscripts">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?b_%7Bl%7D%5E%7Be%7D">
+                                    </button>
+                                </div>
+
+                                <!-- Fractions -->
+                                <a class="btn btn-primary w-100" data-bs-toggle="collapse" href="#Fractions" role="button" aria-controls="Fractions">
+                                    Fractions
+                                </a>
+                                <div class="collapse w-100" id="Fractions">
+                                    <!-- BASIC FRACTION -->
+                                    <button type="button" onclick="sendClipboard('\\frac{t}{b}');" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Basic Fraction">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%5Cfrac%7Bt%7D%7Bb%7D">
+                                    </button>
+                                </div>
+
+                                <!-- Radicals -->
+                                <a class="btn btn-primary w-100" data-bs-toggle="collapse" href="#Radicals" role="button" aria-controls="Radicals">
+                                    Radicals
+                                </a>
+                                <div class="collapse w-100" id="Radicals">
+                                    <!-- BASIC SQUARE ROOT -->
+                                    <button type="button" onclick="sendClipboard('\sqrt{x}');" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Basic Squareroot">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%5Csqrt%7Bx%7D">
+                                    </button>
+
+                                    <!-- DEGREE SQUARE ROOT -->
+                                    <button type="button" onclick="sendClipboard('\sqrt[i]{x}');" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Squareroot of Degree">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%5Csqrt%5Bi%5D%7Bx%7D">
+                                    </button>
+                                </div>
+                                
+                                <!-- MATRICES AND ARRAYS -->
+                                <a class="btn btn-primary w-100" data-bs-toggle="collapse" href="#Matrices" role="button" aria-controls="Matrices">
+                                    Matrices and Arrays
+                                </a>
+                                <div class="collapse w-100" id="Matrices">
+                                    <!-- Bracketed Matrix -->
+                                    <button type="button" onclick="sendClipboard('\\begin{bmatrix}\na & b\\\\ \nc & d\n\\end{bmatrix}');" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Bracketed Matrix">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%5Cbegin%7Bbmatrix%7D%0A%20%20%20a%20%26%20b%20%5C%5C%0A%20%20%20c%20%26%20d%0A%5Cend%7Bbmatrix%7D">
+                                    </button>
+                                    <!-- Parentheses Matrix -->
+                                    <button type="button" onclick="sendClipboard('\\begin{pmatrix}\na & B\\\\\nc & d\n\\end{pmatrix}');" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Parentheses Matrix">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%5Cbegin%7Bpmatrix%7D%0Aa%20%26%20b%5C%5C%20%0Ac%20%26%20d%0A%5Cend%7Bpmatrix%7D">
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="p-2 w-100">
+                                <div class="form-check"  data-bs-toggle="tooltip" data-bs-placement="bottom" title="Inserts '$$' before and after the clicked function">
+                                    <input class="form-check-input" type="checkbox" value="" id="KWrapperCheck" checked>
+                                    <label class="form-check-label" for="KWrapperCheck">
+                                        Include KaTeX Wrapper
+                                    </label>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="row p-2">

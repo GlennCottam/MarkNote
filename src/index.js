@@ -35,7 +35,8 @@ else
 {
     _ENV.GLOBAL_URI = config.server.uri.local.url;
     _ENV.GLOBAL_PORT = config.server.uri.local.port;
-    _ENV.GLOBAL_ROOT = config.server.uri.local.url + ":" + config.server.uri.local.port;
+    // _ENV.GLOBAL_ROOT = config.server.uri.local.url + ":" + config.server.uri.local.port;
+    _ENV.GLOBAL_ROOT = config.server.uri.local.url
 }
 
 logger.startup("GLOBAL VARIABLE SET: " +

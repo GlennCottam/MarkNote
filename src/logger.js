@@ -46,6 +46,12 @@ global_methods.session = class session
 {
     constructor(url, session_data)
     {
+        this.url = session_data.url;
+        this.loggedin = session_data.loggedin;
+        this.expiry = session_data.expiry;
+        this.token_refresh = session_data.token_refresh;
+
+
         var token_refresh;
         if(session_data.tokenrefresh)
         {
@@ -65,6 +71,12 @@ global_methods.session = class session
 
         console.log(this.data);
     }
+
+    print()
+    {
+        
+    }
+
 }
 
 
