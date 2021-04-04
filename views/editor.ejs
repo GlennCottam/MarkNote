@@ -63,6 +63,10 @@
             const base_url = "<%=GLOBAL_ROOT%>" + "/";
             var toastElList = null;
             var toastList = null;
+
+
+            
+
             
             async function sendClipboard(data)
             {
@@ -79,6 +83,11 @@
                 }
 
                 showToast('info', 'Copied to Clipboard!') 
+            }
+
+            async function sendClipboardOverride(data)
+            {
+                await navigator.clipboard.writeText(data);
             }
             
 
@@ -127,21 +136,26 @@
             // https://stackoverflow.com/questions/93695/best-cross-browser-method-to-capture-ctrls-with-jquery#14180949
             $(window).bind('keydown', function(event) {
                 if (event.ctrlKey || event.metaKey) {
-                    switch (String.fromCharCode(event.which).toLowerCase()) {
-                    case 's':
-                        event.preventDefault();
-                        save();
-                        break;
-                    case 'f':
-                        event.preventDefault();
-                        break;
-                    case 'o':
-                        event.preventDefault();
-                        createPicker();
-                        break;
-                    case 'g':
-                        event.preventDefault();
-                        break;
+                    switch (String.fromCharCode(event.which).toLowerCase()) 
+                    {
+                        case 's':
+                            event.preventDefault();
+                            save();
+                            break;
+                        case 'f':
+                            event.preventDefault();
+                            break;
+                        case 'o':
+                            event.preventDefault();
+                            createPicker();
+                            break;
+                        case 'g':
+                            event.preventDefault();
+                            break;
+                        case 'm':
+                            event.preventDefault();
+                            insertAtCursor('$$ $$');
+                            break;
                     }
                 }
                 if(event.altKey && String.fromCharCode(event.which).toLowerCase() == 'n')
@@ -200,6 +214,11 @@
                     return new bootstrap.Toast(toastEl, option)
                 });         
 
+                // https://kubyshkin.name/posts/insert-text-into-textarea-at-cursor-position/
+                window.insertAtCursor = function(data) 
+                {
+                    document.execCommand('insertText', false, data)
+                }
 
                 console.log("ready");
                 
@@ -324,14 +343,18 @@
                     </div>
                     <!-- Functions and Math Buttons -->
                     <div class="row p-2">
-                        <div class="container-fluid p-0 pt-2 border border-dark rounded">
+                        <div class="container-fluid p-0 pt-2 border-top border-bottom border-secondary">
                             <h4 class="text-center">Math Shortcuts</h4>
                             <div class="btn-group p-0 w-100">
                                 <a class="btn btn-secondary" data-bs-toggle="collapse" href="#Math_Structures" role="button" aria-expanded="false" aria-controls="multiCollapse">Structures</a>
                                 <a class="btn btn-secondary" data-bs-toggle="collapse" href="#Math_Symbols" role="button" aria-expanded="false" aria-controls="multiCollapse">Symbols</a>
+                                <a class="btn btn-secondary" data-bs-toggle="collapse" href="#KaTeXSpecific" role="button" aria-expanded="false" aria-controls="multiCollapse">KaTeX</a>
                                 
                             </div>
-                            <div class="collapse p-2 text-white w-100" id="Math_Structures">
+                            
+
+                            <!-- Math Structures -->
+                            <div class="collapse p-2 text-white w-100 text-center" id="Math_Structures">
 
                                 <!-- SUPER AND SUBSCRIPTS -->
                                 <a class="btn btn-primary w-100" data-bs-toggle="collapse" href="#Sub_Super_Scripts_Area" role="button" aria-controls="Sub_Super_Scripts_Area">
@@ -389,12 +412,224 @@
                                     <button type="button" onclick="sendClipboard('\\begin{bmatrix}\na & b\\\\ \nc & d\n\\end{bmatrix}');" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Bracketed Matrix">
                                         <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%5Cbegin%7Bbmatrix%7D%0A%20%20%20a%20%26%20b%20%5C%5C%0A%20%20%20c%20%26%20d%0A%5Cend%7Bbmatrix%7D">
                                     </button>
+
                                     <!-- Parentheses Matrix -->
                                     <button type="button" onclick="sendClipboard('\\begin{pmatrix}\na & B\\\\\nc & d\n\\end{pmatrix}');" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Parentheses Matrix">
                                         <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%5Cbegin%7Bpmatrix%7D%0Aa%20%26%20b%5C%5C%20%0Ac%20%26%20d%0A%5Cend%7Bpmatrix%7D">
                                     </button>
+
+                                    <!-- Small Matrix -->
+                                    <button type="button" onclick="sendClipboard('\\begin{smallmatrix}\na & B\\\\\nc & d\n\\end{smallmatrix}');" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Small Matrix">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%5Cbegin%7Bsmallmatrix%7D%0A%20%20%20a%20%26%20b%20%5C%5C%0A%20%20%20c%20%26%20d%0A%5Cend%7Bsmallmatrix%7D">
+                                    </button>
+                                </div>
+
+                                <!-- Summations -->
+                                <a class="btn btn-primary w-100" data-bs-toggle="collapse" href="#Summations" role="button" aria-controls="Summations">
+                                    Summations
+                                </a>
+                                <div class="collapse w-100" id="Summations">
+
+                                    <!-- Large Summation -->
+                                    <button type="button" class="btn m-0" onclick="sendClipboard('\\displaystyle\\sum_{i=1}^n');" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Large Summation">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%5Cdisplaystyle%5Csum_%7Bi%3D1%7D%5En">
+                                    </button>
+
+                                    <!-- Inline Summation -->
+                                    <button type="button" class="btn m-0" onclick="sendClipboard('\\textstyle\\sum_{i=1}^n');" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Inline Summation">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%5Ctextstyle%5Csum_%7Bi%3D1%7D%5En">
+                                    </button>
+                                </div>
+
+                                <!-- Trigonometry -->
+                                <a class="btn btn-primary w-100" data-bs-toggle="collapse" href="#Trigonometry" role="button" aria-controls="Trigonometry">
+                                    Trigonometry
+                                </a>
+                                <div class="collapse w-100 text-dark" id="Trigonometry">
+
+                                    <!-- Sine -->
+                                    <button type="button" class="btn m-0" onclick="sendClipboard('\\sin(x)');" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Sine">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%5Csin(x)">
+                                    </button>
+
+                                    <!-- Cosine -->
+                                    <button type="button" class="btn m-0" onclick="sendClipboard('\\cos(x)');" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Cosine">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%5Ccos(x)">
+                                    </button>
+
+                                    <!-- Tangent -->
+                                    <button type="button" class="btn m-0" onclick="sendClipboard('\\tan(x)');" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Tangent">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%5Ctan(x)">
+                                    </button>
+
+                                    <!-- Theta -->
+                                    <button type="button" class="btn m-0" onclick="sendClipboard('\\Theta');" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Theta">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%5CTheta">
+                                    </button>
+
+                                    <!-- Pi -->
+                                    <button type="button" class="btn m-0" onclick="sendClipboard('\\pi');" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Pi">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%5Cpi">
+                                    </button>
+
+
                                 </div>
                             </div>
+
+                            <!-- Math Symbols -->
+                            <div class="collapse p-2 text-white w-100 text-center" id="Math_Symbols">
+                                <a class="btn btn-primary w-100" data-bs-toggle="collapse" href="#Relations" role="button" aria-controls="Relations">
+                                    Relations
+                                </a>
+                                <div class="collapse w-100" id="Relations">
+
+                                    <!-- Equal -->
+                                    <button type="button" onclick="sendClipboard('=');" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Equal">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%3D">
+                                    </button>
+
+                                    <!-- NEQ -->
+                                    <button type="button" onclick="sendClipboard('\\neq');" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Not Equal">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%5Cneq">
+                                    </button>
+
+                                    <!-- Greater Than -->
+                                    <button type="button" onclick="sendClipboard('>');" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Greater Than">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%3E">
+                                    </button>
+
+                                    <!-- Greater or Equal Than -->
+                                    <button type="button" onclick="sendClipboard('\\ge');" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Greater or Equal Than">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%5Cge">
+                                    </button>
+
+                                    <!-- Less Than -->
+                                    <button type="button" onclick="sendClipboard('<');" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Less Than">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%3C">
+                                    </button>
+
+                                    <!-- Less Or Equal Than -->
+                                    <button type="button" onclick="sendClipboard('\\le');" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Less or Equal Than">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%5Cle">
+                                    </button>
+                                    
+
+                                </div>
+
+                                <!-- Logic  -->
+                                <a class="btn btn-primary w-100" data-bs-toggle="collapse" href="#Logic" role="button" aria-controls="Logic">
+                                    Logic and Set Theory
+                                </a>
+                                <div class="collapse w-100" id="Logic">
+
+                                    <!-- Therefore -->
+                                    <button type="button" onclick="sendClipboard('\\therefore');" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Therefore">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%5Ctherefore">
+                                    </button>
+
+                                    <!-- Because -->
+                                    <button type="button" onclick="sendClipboard('\\because');" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Because">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%5Cbecause">
+                                    </button>
+
+                                    <!-- Forall -->
+                                    <button type="button" onclick="sendClipboard('\\forall');" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Forall">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%5Cforall">
+                                    </button>
+
+                                    <!-- Exists -->
+                                    <button type="button" onclick="sendClipboard('\\exists');" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Exists">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%5Cexists">
+                                    </button>
+
+                                    <!-- Doesn't Exist -->
+                                    <button type="button" onclick="sendClipboard('\\nexists');" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Doesn't Exist">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%5Cnexists">
+                                    </button>
+
+                                    <!-- In -->
+                                    <button type="button" onclick="sendClipboard('\\notin');" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Not In">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%5Cin">
+                                    </button>
+
+                                    <!-- Not In -->
+                                    <button type="button" onclick="sendClipboard('\\in');" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%5Cnotin">
+                                    </button>
+
+                                    <!-- Subset -->
+                                    <button type="button" onclick="sendClipboard('\\subset');" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Subset">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%5Csubset">
+                                    </button>
+
+                                    <!-- Superset -->
+                                    <button type="button" onclick="sendClipboard('\\supset');" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Superset">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%5Csupset">
+                                    </button>
+
+                                     <!-- Implies -->
+                                     <button type="button" onclick="sendClipboard('\\implies');" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Implies">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%5Cimplies">
+                                    </button>
+
+                                     <!-- Implied By -->
+                                     <button type="button" onclick="sendClipboard('\\impliedby');" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Implied By">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%5Cimpliedby">
+                                    </button>
+
+                                    <!-- Not -->
+                                    <button type="button" onclick="sendClipboard('\\neg');" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Not">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%5Cneg">
+                                    </button>
+
+                                </div>
+
+                                <!-- Greek -->
+                                <a class="btn btn-primary w-100" data-bs-toggle="collapse" href="#Greek" role="button" aria-controls="Greek">
+                                    Greek
+                                </a>
+                                <div class="collapse w-100" id="Greek">
+
+                                    <!-- Alpha -->
+                                    <button type="button" onclick="sendClipboard('\\alpha');" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Alpha">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%5Calpha">
+                                    </button>
+
+                                    <!-- Beta -->
+                                    <button type="button" onclick="sendClipboard('\\beta');" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Beta">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%5Cbeta">
+                                    </button>
+
+                                    <!-- Gamma -->
+                                    <button type="button" onclick="sendClipboard('\\gamma');" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Gamma">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%5Cgamma">
+                                    </button>
+
+                                    <!-- Delta -->
+                                    <button type="button" onclick="sendClipboard('\\delta');" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Delta">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%5Cdelta">
+                                    </button>
+
+                                    <!-- Epsilon -->
+                                    <button type="button" onclick="sendClipboard('\\epsilon');" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Epsilon">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%5Cepsilon">
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="collapse p-2 text-white w-100 text-center" id="KaTeXSpecific">
+                                <!-- Newline -->
+                                <button type="button" onclick="sendClipboardOverride('\\newline');" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Newline">
+                                    New Line
+                                </button>
+
+                                <!-- MATH -->
+                                <button type="button" onclick="sendClipboardOverride('$$ $$');" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Math Tag">
+                                    $$ $$
+                                </button>
+                            </div>
+
+                            <!-- KaTeX Injection Check Box -->
                             <div class="p-2 w-100">
                                 <div class="form-check"  data-bs-toggle="tooltip" data-bs-placement="bottom" title="Inserts '$$' before and after the clicked function">
                                     <input class="form-check-input" type="checkbox" value="" id="KWrapperCheck" checked>
@@ -430,6 +665,10 @@
                                         <tr>
                                             <td><code>ALT / CTRL + O</code></td>
                                             <td>Open File</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>CTRL + M</code></td>
+                                            <td>Insert KaTeX Container</td>
                                         </tr>
                                     </tbody>
                                 </table>
