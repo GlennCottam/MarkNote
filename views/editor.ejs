@@ -57,6 +57,27 @@
                 bottom: 32px;
                 right: 12px;
             }
+
+            @media(max-width: 1024px)
+            {
+                #save_button
+                {
+                    bottom: 132px;
+                }
+                #Math_Shortcuts
+                {
+                    position: fixed !important;
+                    bottom: 0px !important;
+                    z-index: 2002;
+                }
+
+                #Math_Shortcuts_Parent
+                {
+                    padding: 0px !important;
+                }
+                
+            }
+            
         </style>
         <script>          
             var editor = null;
@@ -342,8 +363,8 @@
                         </div>
                     </div>
                     <!-- Functions and Math Buttons -->
-                    <div class="row p-2">
-                        <div class="container-fluid p-0 pt-2 border-top border-bottom border-secondary">
+                    <div id="Math_Shortcuts_Parent" class="row p-2">
+                        <div id="Math_Shortcuts" class="container-fluid m-0 p-0 pt-2 border rounded-top border-secondary bg-light">
                             <h4 class="text-center">Math Shortcuts</h4>
                             <div class="btn-group p-0 w-100">
                                 <a class="btn btn-secondary" data-bs-toggle="collapse" href="#Math_Structures" role="button" aria-expanded="false" aria-controls="multiCollapse">Structures</a>
@@ -613,6 +634,136 @@
                                     <!-- Epsilon -->
                                     <button type="button" onclick="sendClipboard('\\epsilon');" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Epsilon">
                                         <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%5Cepsilon">
+                                    </button>
+
+                                    <!-- Zeta -->
+                                    <button type="button" onclick="sendClipboard('\\zeta');" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Zeta">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%5Czeta">
+                                    </button>
+
+                                    <!-- Eta -->
+                                    <button type="button" onclick="sendClipboard('\\eta');" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Eta">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%5Ceta">
+                                    </button>
+
+                                    <!-- Theta -->
+                                    <button type="button" onclick="sendClipboard('\\theta');" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Theta">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%5Ctheta">
+                                    </button>
+
+                                    <!-- Iota -->
+                                    <button type="button" onclick="sendClipboard('\\iota');" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Iota">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%5Ciota">
+                                    </button>
+
+                                    <!-- Kappa -->
+                                    <button type="button" onclick="sendClipboard('\\kappa');" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Kappa">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%5Ckappa">
+                                    </button>
+
+                                    <!-- Lambda -->
+                                    <button type="button" onclick="sendClipboard('\\lambda');" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Lambda">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%5Clambda">
+                                    </button>
+
+                                    <!-- Mu -->
+                                    <button type="button" onclick="sendClipboard('\\mu');" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Mu">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%5Cmu">
+                                    </button>
+
+                                    <!-- Nu -->
+                                    <button type="button" onclick="sendClipboard('\\nu');" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Nu">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%5Cnu">
+                                    </button>
+
+                                    <!-- Xi -->
+                                    <button type="button" onclick="sendClipboard('\\xi');" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Xi">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%5Cxi">
+                                    </button>
+
+                                    <!-- Pi -->
+                                    <button type="button" onclick="sendClipboard('\\pi');" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Pi">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%5Cpi">
+                                    </button>
+
+                                    <!-- Rho -->
+                                    <button type="button" onclick="sendClipboard('\\rho');" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Rho">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%5Crho">
+                                    </button>
+
+                                    <!-- Sigma -->
+                                    <button type="button" onclick="sendClipboard('\\sigma');" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Sigma">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%5Csigma">
+                                    </button>
+
+                                    <!-- Tau -->
+                                    <button type="button" onclick="sendClipboard('\\tau');" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Tau">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%5Ctau">
+                                    </button>
+
+                                    <!-- Upsilon -->
+                                    <button type="button" onclick="sendClipboard('\\upsilon');" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Upsilon">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%5Cupsilon">
+                                    </button>
+
+                                    <!-- Phi -->
+                                    <button type="button" onclick="sendClipboard('\\phi');" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Phi">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%5Cphi">
+                                    </button>
+
+                                    <!-- Chi -->
+                                    <button type="button" onclick="sendClipboard('\\chi');" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Chi">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%5Cchi">
+                                    </button>
+
+                                    <!-- Psi -->
+                                    <button type="button" onclick="sendClipboard('\\psi');" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Psi">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%5Cpsi">
+                                    </button>
+
+                                    <!-- Omega -->
+                                    <button type="button" onclick="sendClipboard('\\omega');" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Omega">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%5Comega">
+                                    </button>
+
+                                    <!-- Varepsilon -->
+                                    <button type="button" onclick="sendClipboard('\\varepsilon');" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Varepsilon">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%5Cvarepsilon">
+                                    </button>
+
+                                    <!-- Varkappa -->
+                                    <button type="button" onclick="sendClipboard('\\varkappa');" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Varkappa">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%5Cvarkappa">
+                                    </button>
+
+                                    <!-- Vartheta -->
+                                    <button type="button" onclick="sendClipboard('\\vartheta');" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Vartheta">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%5Cvartheta">
+                                    </button>
+
+                                    <!-- Varpi -->
+                                    <button type="button" onclick="sendClipboard('\\varpi');" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Varpi">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%5Cvarpi">
+                                    </button>
+
+                                    <!-- Varrho -->
+                                    <button type="button" onclick="sendClipboard('\\varrho');" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Varrho">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%5Cvarrho">
+                                    </button>
+
+                                    <!-- Varsigma -->
+                                    <button type="button" onclick="sendClipboard('\\varsigma');" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Varsigma">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%5Cvarsigma">
+                                    </button>
+
+                                    <!-- Varphi -->
+                                    <button type="button" onclick="sendClipboard('\\varphi');" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Varphi">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%5Cvarphi">
+                                    </button>
+
+                                    <!-- Digamma -->
+                                    <button type="button" onclick="sendClipboard('\\digamma');" class="btn m-0" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Digamma">
+                                        <img class="hmd-math-dumb" src="https://latex.codecogs.com/gif.latex?%5Cdigamma">
                                     </button>
                                 </div>
                             </div>
