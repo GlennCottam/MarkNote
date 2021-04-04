@@ -1,22 +1,28 @@
 {
-    "name": "MarkNote",
+    "name": "MarkNote Markdown Document Writer",
     "short_name": "MarkNote",
-    "start_url": "/?source=pwa",
-    "display": "standalone",
+    "start_url": "/",
+    "display": "minimal-ui",
     "background_color": "#212529",
+    "theme_color": "#29109E",
     "description": "Marknote Document Writer",
+    "screenshots": [
+        {
+            "src": "/public/images/MarkNote - Editor - Mobile.png"
+        }
+    ],
     "icons":[
         {
-            "src": "icons/96w/Artboard 1.png",
+            "src": "/public/icons/96w/Artboard 1.png",
             "type": "image/png",
-            "sizes": "any"
+            "sizes": "402x504"
         }
     ],
     "shortcuts": [
         {
-            "name": "landing",
+            "name": "Home",
             "url": "/",
-            "description": "Landing Page"
+            "description": "Home Page"
         }
     ]
 }

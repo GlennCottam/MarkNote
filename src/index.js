@@ -35,7 +35,7 @@ else
 {
     _ENV.GLOBAL_URI = config.server.uri.local.url;
     _ENV.GLOBAL_PORT = config.server.uri.local.port;
-    // _ENV.GLOBAL_ROOT = config.server.uri.local.url + ":" + config.server.uri.local.port;
+    _ENV.GLOBAL_ROOT = config.server.uri.local.url + ":" + config.server.uri.local.port;
     _ENV.GLOBAL_ROOT = config.server.uri.local.url
 }
 
@@ -119,6 +119,7 @@ logger.success("Import Complete.");
 // TODO: Change BODYPARSER to something else as its old and not used anymore
 app.use(BodyParser.urlencoded({extended: true, limit: '1gb'}));                     // LARGE FILE FIX
 app.use('/public', Express.static('public'));
+app.use('/service-worker.js', Express.static('service-worker.js'));
 app.use(Cors());        
 app.enable('trust proxy');                                                        // Sets Cors Policy
 app.set('view engine', 'ejs');
