@@ -19,8 +19,6 @@ logger.startup.splash(
     "---------------------------------"
 );
 
-// 103741523908151779324
-
 
 logger.startup("Setting Environment Variables");
 const _ENV = process.env;
@@ -35,7 +33,7 @@ else
 {
     _ENV.GLOBAL_URI = config.server.uri.local.url;
     _ENV.GLOBAL_PORT = config.server.uri.local.port;
-    _ENV.GLOBAL_ROOT = config.server.uri.local.url + ":" + config.server.uri.local.port;
+    // _ENV.GLOBAL_ROOT = config.server.uri.local.url + ":" + config.server.uri.local.port;
     _ENV.GLOBAL_ROOT = config.server.uri.local.url
 }
 

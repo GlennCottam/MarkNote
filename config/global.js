@@ -1,11 +1,11 @@
 module.exports = 
 {
     "server": {
-        "production": true,
+        "production": false,
         "uri": {
             "local": 
             {
-                "url": "https://localhost",
+                "url": "https://marknote.mackwnox.ca",
                 "port": 8080,
             },
             "production": 
